@@ -14,12 +14,12 @@ enum TokenType
         LESS, LESS_EQUAL,
 
         // Literals.
-        IDENTIFIER, STRING, NUMBER,
+        IDENTIFIER, STRING, NUMBER,SYMBOL,
 
         // Keywords.
         AND, FALSE, FUNNAME, FOR, IF, NIL, OR, DEFINE,
         PRINT, RETURN, THIS, TRUE, VAR, LIST,
-        COND, CONS, CAR, CDR, SET, EQ, SYMBOL,
+        COND, CONS, CAR, CDR, SET, EQ, 
         ISNUMBER, ISSYMBOL, ISNIL,
 
         //others
@@ -38,7 +38,7 @@ const string enum_str[] =
         "IDENTIFIER", "STRING", "NUMBER","SYMBOL",
         "AND", "FALSE", "FUNNAME", "FOR", "IF", "NIL", "OR", "DEFINE",
         "PRINT", "RETURN", "THIS", "TRUE", "VAR", "LIST",  
-        "COND", "CONS", "CAR", "CDR", "SET", "EQ", "SYMBOL",
+        "COND", "CONS", "CAR", "CDR", "SET", "EQ",
         "ISNUMBER", "ISSYMBOL", "ISNIL",
         "TokenEOF",
 };

@@ -1,12 +1,22 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <iterator>
 #include "scanner.cpp"
 
-void runFile(std::string file)
+class Lisp
+{
+    public:
+        void runFile(std::string lispFile);
+    private:
+        void run(std::string lispCode);
+};
+
+void 
+Lisp::runFile(std::string lispFile)
 {
     std::ifstream fPtr;
-    fPtr.open(file);
+    fPtr.open(lispFile);
 
     std::string fileCode;
     std::string fileLine;
@@ -25,9 +35,16 @@ void runFile(std::string file)
     }
 }
 
-void run(std::string code)
+void 
+Lisp::run(std::string lispCode)
 {
-    LispScanner* scanner = new LispScanner(code);
+    LispScanner* scanner = new LispScanner(lispCode);
+    list<Token> lispTokens = scanner->scanTokens();
+
+    for(auto itr = lispTokens.begin(); itr != lispTokens.end(); itr++)
+    {
+        cout << itr->getTokenType() << endl;
+    }
 }
 
 
@@ -39,6 +56,7 @@ int main(int argc, char** argv)
     }
     else if(argc == 2)
     {
-        runFile(argv[1]);
+        Lisp lsp;
+        lsp.runFile(argv[1]);
     }
 }

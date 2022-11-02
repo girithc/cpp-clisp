@@ -27,25 +27,26 @@ class LispScanner
 
         map <string, TokenType> keywords = 
         {
-            {"and", AND},
             {"false", FALSE},
             {"for", FOR},
-            {"funname", FUNNAME},
             {"if", IF},
-            {"nil", NIL},
-            {"or", OR},
             {"print", PRINT},
             {"return", RETURN},
             {"this", THIS},
             {"true", TRUE},
             {"var", VAR},
             {"cons", CONS},
+            {"cond", COND},
             {"cdr", CDR},
             {"car", CAR},
             {"set", SET},
             {"eq", EQ},
-            {"symbol", SYMBOL},
-            {"list", LIST},
+            {"number?", ISNUMBER},
+            {"symbol?", ISSYMBOL},
+            {"list?", LIST},
+            {"nil?", ISNIL},
+            {"or?", OR},
+            {"and?", AND},
             {"define", DEFINE}
         };
 
@@ -111,8 +112,6 @@ LispScanner::scanToken()
             addToken(MINUS); break;
         case '+': 
             addToken(PLUS); break;
-        case ';': 
-            addToken(SEMICOLON); break;
         case '*': 
             addToken(STAR); break;
         case '!':
@@ -139,8 +138,8 @@ LispScanner::scanToken()
             else 
                 addToken(GREATER);
             break;
-        case '/':
-            if (match('/')) {
+        case ';':
+            if (match(';')) {
                 // a line of comment
                 while(isNotEnd() && lookAhead() != '\n')
                     advance();
@@ -164,6 +163,9 @@ LispScanner::scanToken()
         case '"':
             addTokenString();
             break;
+        case '\'':
+            if(match('t'))
+                addToken(TRUE);
 
         default:
             if(isDigit(advanceChar))
@@ -176,7 +178,7 @@ LispScanner::scanToken()
             }
             else
             {
-                cout << "Unexpected character at line " << line << endl;
+                cout << "Unexpected character:  "<< advanceChar << " at line " << line << endl;
             }
 
             break;
@@ -192,6 +194,7 @@ LispScanner::addToken(TokenType t)
 void 
 LispScanner::addToken(TokenType t, string tokenLiteral)
 {
+    cout << "AddToken(" << enum_str[t] << "," << lispCode.substr(start,lenLispCode()) << "," << tokenLiteral << "," << line << ")" << endl;
     lispTokens.push_back(*(new Token(t,lispCode.substr(start,lenLispCode()),tokenLiteral,line)));
 }
 
@@ -278,7 +281,7 @@ LispScanner::isAlpha(char c)
 
     if (c >= 'a' && c <= 'z') return true;
     if (c >= 'A' && c <= 'Z') return true;
-    if (c == '_') return true;
+    if (c == '_' || c == '?') return true;
     return false;
 }
 
