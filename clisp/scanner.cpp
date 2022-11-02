@@ -1,6 +1,8 @@
 #include <string>
 #include <list>
 #include <map>
+#include <iostream>
+#include <iterator>
 #include "token.cpp"
 
 
@@ -8,10 +10,10 @@ using namespace std;
 
 
 
-class lispScanner
+class LispScanner
 {
     public:
-        lispScanner(string s);
+        LispScanner(string s);
         list<Token> scanTokens();
 
     private:
@@ -25,13 +27,33 @@ class lispScanner
 
         map <string, TokenType> keywords = 
         {
-            {},
+            {"and", AND},
+            {"false", FALSE},
+            {"for", FOR},
+            {"funname", FUNNAME},
+            {"if", IF},
+            {"nil", NIL},
+            {"or", OR},
+            {"print", PRINT},
+            {"return", RETURN},
+            {"this", THIS},
+            {"true", TRUE},
+            {"var", VAR},
+            {"cons", CONS},
+            {"cdr", CDR},
+            {"car", CAR},
+            {"set", SET},
+            {"eq", EQ},
+            {"symbol", SYMBOL},
+            {"list", LIST},
+            {"define", DEFINE}
         };
 
         void scanToken();
-        void identifier();
+
         void addToken(TokenType t);
         void addToken(TokenType t, string tokenLiteral);
+        void addTokenIdentifier();
         void addTokenDigit();
         void addTokenString();
 
@@ -40,24 +62,39 @@ class lispScanner
         char lookAhead();
         char lookAheadAhead();
 
+        bool isAlphaNum(char c);
         bool isAlpha(char c);
         bool isDigit(char c);
         bool isNotEnd();
         bool match(char c);
+
+        int lenLispCode();
 };
 
 
-lispScanner::lispScanner(string s)
+LispScanner::LispScanner(string s)
 {
     lispCode = s;
 }
 
 list<Token>
-lispScanner::scanTokens()
+LispScanner::scanTokens()
+{
+    while(isNotEnd())
+    {
+        start = current;
+        scanToken();
+    }
+    lispTokens.push_back(*(new Token(TokenEOF,"","",line)));
+    return lispTokens;
+}
+
+void
+LispScanner::scanToken()
 {
     char advanceChar = advance();
 
-    switch (ch) {
+    switch (advanceChar) {
         case '(': 
             addToken(LEFT_PAREN); break;
         case ')': 
@@ -129,20 +166,158 @@ lispScanner::scanTokens()
             break;
 
         default:
-            if(isDigit(ch))
+            if(isDigit(advanceChar))
             {
                 addTokenDigit();
             }  
-            else if(isAlpha(ch))
+            else if(isAlpha(advanceChar))
             {
-                identifier();
+                addTokenIdentifier();
             }
             else
             {
-                /// @brief Error message handling. Should redirect to lox.error //
-                cout << line << ", " << "Unexpected character. " << endl;
+                cout << "Unexpected character at line " << line << endl;
             }
 
             break;
         }
 }
+
+void
+LispScanner::addToken(TokenType t)
+{
+    addToken(t,"");
+}
+
+void 
+LispScanner::addToken(TokenType t, string tokenLiteral)
+{
+    lispTokens.push_back(*(new Token(t,lispCode.substr(start,lenLispCode()),tokenLiteral,line)));
+}
+
+void 
+LispScanner::addTokenIdentifier()
+{
+        while(isAlphaNum(lookAhead())) advance();
+
+        string s = lispCode.substr(start, lenLispCode());
+        
+        if (keywords.find(s) != keywords.end())
+        {
+            auto it = keywords.find(s);
+            TokenType tType = it->second;
+            addToken(tType);
+        }
+        else
+        {
+            addToken(IDENTIFIER);
+        }
+}
+
+void 
+LispScanner::addTokenDigit()
+{
+    while(isDigit(lookAhead()))
+    {
+        advance();
+        //look for decimal numbers. Maximum munch
+        if(isDigit(lookAheadAhead() && lookAhead()=='.')) advance();
+    }
+    addToken(NUMBER,lispCode.substr(start,lenLispCode()));
+}
+
+void 
+LispScanner::addTokenString()
+{
+    while(isNotEnd() && lookAhead()!='"')
+    {
+        if(lookAhead()!='\n') advance();
+        line ++;
+    }
+    //unterminated string
+    if(!isNotEnd())
+    {
+        cout << "Unterminated string. Line: "<< line << endl;
+        return;
+    }
+    string stringLispCode = lispCode.substr(start+1, (current-1-(start+1)));
+    addToken(STRING, stringLispCode);
+}
+
+char
+LispScanner::advance()
+{
+    //advance current
+    current++;
+    return lispCode[current-1];
+}
+
+char
+LispScanner::lookAhead()
+{
+    if(!isNotEnd()) return '\0';
+    return lispCode[current];
+}
+
+char 
+LispScanner::lookAheadAhead()
+{
+    if(lispCode.length() < (current+1)) return '\0';
+    return lispCode[current+1];
+}
+
+bool
+LispScanner::isAlphaNum(char c)
+{
+    return (isAlpha(c) || isDigit(c));
+}
+
+bool
+LispScanner::isAlpha(char c)
+{
+
+    if (c >= 'a' && c <= 'z') return true;
+    if (c >= 'A' && c <= 'Z') return true;
+    if (c == '_') return true;
+    return false;
+}
+
+bool 
+LispScanner::isDigit(char c)
+{
+    if(c<='9')
+    {
+        if(c>='0') 
+            return true;
+    }
+    return false;
+}
+
+bool
+LispScanner::isNotEnd()
+{
+    if(lispCode.length() > current) return true;
+    return false;
+}
+
+bool
+LispScanner::match(char c)
+{
+    if(isNotEnd())
+    {
+        if(lispCode[current]==c)
+        {
+            current++;
+            return true;
+        } 
+    }
+    return false;
+}
+
+
+int
+LispScanner::lenLispCode()
+{
+    return current-start;
+}
+
