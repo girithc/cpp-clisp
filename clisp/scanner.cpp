@@ -94,7 +94,7 @@ void
 LispScanner::scanToken()
 {
     char advanceChar = advance();
-
+    cout << "Current char: " << advanceChar << endl;
     switch (advanceChar) {
         case '(': 
             addToken(LEFT_PAREN); break;
@@ -166,6 +166,7 @@ LispScanner::scanToken()
         case '\'':
             if(match('t'))
                 addToken(TRUE);
+            break;
 
         default:
             if(isDigit(advanceChar))
