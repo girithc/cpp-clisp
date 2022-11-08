@@ -17,7 +17,7 @@ enum TokenType
         IDENTIFIER, STRING, NUMBER,SYMBOL,
 
         // Keywords.
-        AND, FALSE, FUNNAME, FOR, IF, NIL, OR, DEFINE,
+        AND, FALSE, FUNNAME, FOR, IF, ELSE, NIL, OR, DEFINE,
         PRINT, RETURN, THIS, TRUE, VAR, LIST,
         COND, CONS, CAR, CDR, SET, EQ, 
         ISNUMBER, ISSYMBOL, ISNIL,
@@ -36,7 +36,7 @@ const string enum_str[] =
         "GREATER", "GREATER_EQUAL",
         "LESS", "LESS_EQUAL",
         "IDENTIFIER", "STRING", "NUMBER","SYMBOL",
-        "AND", "FALSE", "FUNNAME", "FOR", "IF", "NIL", "OR", "DEFINE",
+        "AND", "FALSE", "FUNNAME", "FOR", "IF","ELSE", "NIL", "OR", "DEFINE",
         "PRINT", "RETURN", "THIS", "TRUE", "VAR", "LIST",  
         "COND", "CONS", "CAR", "CDR", "SET", "EQ",
         "ISNUMBER", "ISSYMBOL", "ISNIL",

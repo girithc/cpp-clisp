@@ -45,6 +45,10 @@ Lisp::run(std::string lispCode)
     {
         cout << itr->getTokenType() << endl;
     }
+    lispParser parser(lispTokens);
+    cout << endl << "---- Start Parse ----" << endl;
+    list<Stmt*> stmts = parser.parse();
+    cout << "---- Parse ended ----" << endl << endl;
 }
 
 
