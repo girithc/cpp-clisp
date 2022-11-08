@@ -6,19 +6,7 @@
 #include <list>
 
 using namespace std;
-/*
-program        → statement* EOF ;
-statement      → exprStmt
-               | printStmt ;
-exprStmt       → "(" expression ")" ;
-printStmt      → "( print" expression ")" ;
 
-program        → declaration* EOF ;
-declaration    → varDecl
-               | statement ;
-statement      → exprStmt
-               | printStmt ;
-*/
 class lispParser
 {
     public:
