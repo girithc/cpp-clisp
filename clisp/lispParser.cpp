@@ -142,8 +142,6 @@ lispParser::setDeclaration()
 }
 
 
-
-
 Expr*
 lispParser::lispExpression()
 {
@@ -159,9 +157,11 @@ lispParser::lispPrimary()
 {
     cout << "   Entered lispPrimary" << endl;
 
-    list<TokenType>symnum;
+    list<TokenType>symnum, id, lispExpr;
     symnum.push_back(SYMBOL);
     symnum.push_back(NUMBER);
+    id.push_back(IDENTIFIER);
+    lispExpr.push_back(LEFT_PAREN);
     
     if(match(symnum))
     {
@@ -169,6 +169,18 @@ lispParser::lispPrimary()
         Token symnumToken = getLispToken(current-1);
         return new Literal(symnumToken.getTokenLexeme());
     }
+    else if(match(id))
+    {
+        cout << "       matched identifier: " << getLispToken(current-1).getTokenLexeme()<< endl;
+        return new Variable(getLispToken(current-1));
+    }
+    else if (match(lispExpr))
+    {
+        /* repeat process */
+    }
+    
+
+
 
 
     Expr* exprplaceholder;

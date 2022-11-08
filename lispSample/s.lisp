@@ -1,1 +1,2 @@
-(set score 2)
+(set expr 2)
+(set score expr)
