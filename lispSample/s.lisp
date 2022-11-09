@@ -3,4 +3,5 @@
 //(set a (cons b c))
 //(set a b)
 
-(set a (car (cdr b)))
+//(set a (car (cdr b)))
+//(print (/ a b))

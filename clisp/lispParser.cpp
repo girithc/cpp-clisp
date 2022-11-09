@@ -155,6 +155,12 @@ lispParser::lispExpression()
     if(match(arithmetic))
     {
         cout << "Entered ARITHMETIC" << endl;
+        Token op = getLispToken(current-1);
+        Expr* a = lispExpression();
+        Expr* b = lispExpression();
+
+        cout << "   Created Binary(arithmetic)" << endl;
+        return new Binary(op, a, b);
     } 
     else if(match(cons))
     {
