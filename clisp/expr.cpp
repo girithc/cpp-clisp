@@ -32,6 +32,10 @@ class This;
 class Unary;
 class Variable;
 
+class Cons;
+class Car;
+class Cdr;
+
 class Visitor : public Expr
 {
     public:
@@ -48,6 +52,10 @@ class Visitor : public Expr
         virtual string VisitThisExpr(This *expr) {return "";};
         virtual string VisitUnaryExpr(Unary *expr) {return "";};
         virtual string VisitVariableExpr(Variable *expr) {return "";};
+
+        virtual string VisitConsExpr(Cons *expr){return "";};
+        virtual string VisitCarExpr(Car *expr){return "";};
+        virtual string VisitCdrExpr(Cdr *expr){return "";};
 };
 
 
@@ -78,7 +86,7 @@ class Binary : public Expr
         Token op;
         Expr* right;
 
-        Binary(Expr* l, Token o, Expr* r)
+        Binary(Token o, Expr* l, Expr* r)
         {   left = l;
             right = r;
             op = o;
@@ -86,6 +94,62 @@ class Binary : public Expr
 
         string Accept(Visitor *visitor)       
         {   return visitor->VisitBinaryExpr(this);
+        }
+};
+
+class Cons : public Expr
+{
+    public:
+
+        Token token;
+        Expr* a;
+        Expr* b;
+
+        Cons(Token token, Expr* a, Expr* b)
+        {   
+            this->token = token;
+            this->a = a;
+            this->b = b;
+        }
+
+        string Accept(Visitor *visitor)       
+        {   return visitor->VisitConsExpr(this);
+        }
+};
+
+class Car : public Expr
+{
+    public:
+
+        Token token;
+        Expr* a;
+
+        Car(Token token, Expr* a)
+        {   
+            this->token = token;
+            this->a = a;
+        }
+
+        string Accept(Visitor *visitor)       
+        {   return visitor->VisitCarExpr(this);
+        }
+};
+
+class Cdr : public Expr
+{
+    public:
+
+        Token token;
+        Expr* a;
+
+        Cdr(Token token, Expr* a)
+        {   
+            this->token = token;
+            this->a = a;
+        }
+
+        string Accept(Visitor *visitor)       
+        {   return visitor->VisitCdrExpr(this);
         }
 };
 

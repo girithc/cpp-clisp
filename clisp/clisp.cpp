@@ -38,6 +38,7 @@ Lisp::runFile(std::string lispFile)
 void 
 Lisp::run(std::string lispCode)
 {
+    cout << "LispCode in Main: " << endl << lispCode << endl;
     LispScanner* scanner = new LispScanner(lispCode);
     list<Token> lispTokens = scanner->scanTokens();
 

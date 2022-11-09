@@ -53,10 +53,10 @@ class LispScanner
         void scanToken();
 
         void addToken(TokenType t);
-        void addToken(TokenType t, string tokenLiteral);
+        void addToken(TokenType tokentype, string tokenLiteral);
         void addTokenIdentifier();
         void addTokenDigit();
-        void addTokenString();
+        void addTokenSymbol();
 
         //helper methods
         char advance();
@@ -94,7 +94,7 @@ void
 LispScanner::scanToken()
 {
     char advanceChar = advance();
-    cout << "Current char: " << advanceChar << endl;
+    cout << "Current char: " << advanceChar << " current:" << current << endl;
     switch (advanceChar) {
         case '(': 
             addToken(LEFT_PAREN); break;
@@ -148,6 +148,17 @@ LispScanner::scanToken()
                 addToken(SLASH);
             }
             break;
+        case '/':
+            if (match('/')) {
+                // a line of comment
+                while(isNotEnd() && lookAhead() != '\n')
+                    advance();
+            } 
+            else {
+                addToken(SLASH);
+            }
+            break;
+
 
         case ' ':
         case '\r':
@@ -161,7 +172,7 @@ LispScanner::scanToken()
 
         //STRING
         case '"':
-            addTokenString();
+            addTokenSymbol();
             break;
         case '\'':
             if(match('t'))
@@ -193,10 +204,11 @@ LispScanner::addToken(TokenType t)
 }
 
 void 
-LispScanner::addToken(TokenType t, string tokenLiteral)
+LispScanner::addToken(TokenType tokentype, string tokenLiteral)
 {
-    cout << "AddToken(" << enum_str[t] << "," << lispCode.substr(start,lenLispCode()) << "," << tokenLiteral << "," << line << ")" << endl;
-    lispTokens.push_back(*(new Token(t,lispCode.substr(start,lenLispCode()),tokenLiteral,line)));
+    cout << "   AddToken(" << enum_str[tokentype] << "," << lispCode.substr(start,lenLispCode()) << "," << tokenLiteral << "," << line << ")" << endl;
+    lispTokens.push_back(*(new Token(tokentype,lispCode.substr(start,lenLispCode()),tokenLiteral,line)));
+    
 }
 
 void 
@@ -231,21 +243,25 @@ LispScanner::addTokenDigit()
 }
 
 void 
-LispScanner::addTokenString()
+LispScanner::addTokenSymbol()
 {
     while(isNotEnd() && lookAhead()!='"')
     {
+        cout << "   consuming string" << endl;
         if(lookAhead()!='\n') advance();
         line ++;
     }
     //unterminated string
     if(!isNotEnd())
     {
-        cout << "Unterminated string. Line: "<< line << endl;
+        cout << "Unterminated symbol. Line: "<< line << endl;
         return;
     }
-    string stringLispCode = lispCode.substr(start+1, (current-1-(start+1)));
-    addToken(STRING, stringLispCode);
+    
+    advance();
+    string symbolLispCode = lispCode.substr(start+1, (current-1-(start+1)));
+    //cout << "   symbolLispCode:" << symbolLispCode << endl;
+    addToken(SYMBOL, symbolLispCode);
 }
 
 char
@@ -300,8 +316,7 @@ LispScanner::isDigit(char c)
 bool
 LispScanner::isNotEnd()
 {
-    if(lispCode.length() > current) return true;
-    return false;
+    return (current < lispCode.length());
 }
 
 bool

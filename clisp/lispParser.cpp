@@ -22,6 +22,7 @@ class lispParser
     Stmt* declaration();
     Stmt* detail();
     Stmt* setDeclaration();
+    Stmt* printDeclaration();
 
     Expr* lispExpression();
     Expr* lispAssignment();
@@ -53,7 +54,7 @@ lispParser::parse()
     list<Stmt*> sList;
     while(isNotEnd())
     {
-        cout << "parsing stmt...  curr:" << current << endl;
+        cout << "parsing stmt...  curr:" << current << endl << endl;
         sList.push_back(declaration());
     }
         
@@ -63,7 +64,7 @@ lispParser::parse()
 Stmt*
 lispParser::declaration()
 {
-    cout << "Entered declaration" << endl;
+    cout << "Entered declaration: " << getLispToken(current-1).getTokenType() << endl;
     Token left_paren = consumeLispToken(LEFT_PAREN, "Expect '(' at the start of a statment.");
     //cout << "   After consumeLispToken. Current: " << current << endl;
    
@@ -82,9 +83,60 @@ lispParser::detail()
 {
     cout << "Entered detail" << endl;
 
-    list<TokenType> set, arithmetic, cons, cadr, symnum, define;
+    list<TokenType> set, print, define;
 
     set.push_back(SET);
+    print.push_back(PRINT);
+    define.push_back(DEFINE);
+    
+    if(match(set))
+    {
+        cout << "Entered SET" << endl;
+        return setDeclaration();
+    }
+    else if(match(print))
+    {
+        cout << "Entered PRINT" << endl;
+        return printDeclaration();
+    }
+    else if(match(define))
+    {
+        cout << "Entered DEFINE" << endl;
+    }
+
+
+    Stmt* stmtplaceholder;
+    return stmtplaceholder;
+}
+
+Stmt* 
+lispParser::setDeclaration()
+{
+    cout << "   Entered setDeclaration" << endl;
+    
+    Token id = consumeLispToken(IDENTIFIER, "Expect a variable name as first argument in SET.");
+    Expr* idValue = lispExpression();
+
+    cout << "   Entered setDeclaration again" << endl;
+    
+    cout << "   created VAR" << endl;
+    return new Var(id, idValue);
+}
+
+Stmt*
+lispParser::printDeclaration()
+{
+    Expr* expr = lispExpression();
+
+    cout << "   created PRINT" << endl;
+    return new Print(expr);
+}
+
+
+Expr* 
+lispParser::lispExpression()
+{
+    list<TokenType> arithmetic, cons, cadr, symnum;
     arithmetic.push_back(PLUS);
     arithmetic.push_back(MINUS);
     arithmetic.push_back(STAR);
@@ -99,52 +151,50 @@ lispParser::detail()
     symnum.push_back(SYMBOL);
     symnum.push_back(LIST);
     symnum.push_back(NIL);
-    define.push_back(DEFINE);
-    
-    if(match(set))
-    {
-        cout << "Entered SET" << endl;
-        return setDeclaration();
-    }
-    else if(match(arithmetic))
+
+    if(match(arithmetic))
     {
         cout << "Entered ARITHMETIC" << endl;
     } 
     else if(match(cons))
     {
-        cout << "Entered CONS" << endl;
+        cout << "   Entered CONS" << endl;
+        // (cons a b)
+
+        Token cons = getLispToken(current-1);
+        //cout << "   token:" << cons.getTokenType() << endl;
+        Expr* a = lispExpression();
+        Expr* b = lispExpression();
+
+        cout << "   created Cons" << endl;
+        return new Cons(cons, a, b);
     }
     else if(match(cadr))
     {
         cout << "Entered CAR/CDR" << endl;
+
+        Token cadr = getLispToken(current-1);
+        Expr* a = lispExpression();
+
+        
+        
+        if(cadr.getTokenType() == enum_str[CAR])
+        {
+            cout << "   created CAR" << endl;
+            return new Car(cadr,a);
+        } 
+        else
+        {
+            cout << "   created CDR" << endl;
+            return new Cdr(cadr,a);
+        }
+        
     }
     else if(match(symnum))
     {
         cout << "Entered SYMNUM" << endl;
     }
-    else if(match(define))
-    {
-        cout << "Entered DEFINE" << endl;
-    }
 
-    Stmt* stmtplaceholder;
-    return stmtplaceholder;
-}
-
-
-Stmt* 
-lispParser::setDeclaration()
-{
-    cout << "   Entered setDeclaration" << endl;
-    Token id = consumeLispToken(IDENTIFIER, "Expect a variable name as first argument in SET.");
-    Expr* idValue = lispExpression();
-    return new Var(id, idValue);
-}
-
-
-Expr*
-lispParser::lispExpression()
-{
     return lispAssignment();
 }
 Expr*
@@ -167,16 +217,23 @@ lispParser::lispPrimary()
     {
         cout << "       matched symnum: " << getLispToken(current-1).getTokenType()<< endl;
         Token symnumToken = getLispToken(current-1);
+        cout << "       created LITERAL: " << symnumToken.getTokenLexeme() << endl;
         return new Literal(symnumToken.getTokenLexeme());
     }
     else if(match(id))
     {
         cout << "       matched identifier: " << getLispToken(current-1).getTokenLexeme()<< endl;
+        cout << "       created VARIABLE" << endl;
         return new Variable(getLispToken(current-1));
     }
     else if (match(lispExpr))
     {
         /* repeat process */
+        cout << "       matched another lispExpr" << endl;
+        Expr* lispExpr = lispExpression();
+
+        Token right_paren = consumeLispToken(RIGHT_PAREN, "Expect a ')' at the end of a lisp expression.");
+        return lispExpression();
     }
     
 
@@ -218,7 +275,7 @@ lispParser::check(TokenType tokentype)
 bool
 lispParser::match(list<TokenType> tokentypes)
 {
-    cout << "   Entered match" << endl;
+    cout << "   Entered match" << endl << "    ";
 
     list<TokenType>::iterator i;
     for (i = tokentypes.begin(); i != tokentypes.end(); i++)
@@ -267,7 +324,7 @@ lispParser::getLispToken(int index)
 Token 
 lispParser::consumeLispToken(TokenType tokentype, string message)
 {
-    cout << "   Entered consumeLispToken" << endl;
+    cout << "   Entered consumeLispToken" << endl << "  ";
 
     if(check(tokentype))
     {
