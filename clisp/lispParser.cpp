@@ -1,5 +1,5 @@
 
-#include "stmt.cpp"
+#include "lispInterpreter.cpp"
 
 #include <string>
 #include <iterator>
@@ -75,7 +75,8 @@ lispParser::declaration()
     //cout << "   After consumeLispToken. Current: " << current << endl;
 
     Stmt* stmtplaceholder;
-    return stmtplaceholder;
+    //return stmtplaceholder;
+    return stmtDetail;
 }
 
 Stmt*
@@ -136,7 +137,7 @@ lispParser::printDeclaration()
 Expr* 
 lispParser::lispExpression()
 {
-    list<TokenType> arithmetic, cons, cadr, symnum;
+    list<TokenType> arithmetic, cons, cadr;// symnum;
     arithmetic.push_back(PLUS);
     arithmetic.push_back(MINUS);
     arithmetic.push_back(STAR);
@@ -147,19 +148,20 @@ lispParser::lispExpression()
     cons.push_back(CONS);
     cadr.push_back(CAR);
     cadr.push_back(CDR);
-    symnum.push_back(NUMBER);
-    symnum.push_back(SYMBOL);
-    symnum.push_back(LIST);
-    symnum.push_back(NIL);
+    //symnum.push_back(NUMBER);
+    //symnum.push_back(SYMBOL);
+    //symnum.push_back(LIST);
+    //symnum.push_back(NIL);
 
     if(match(arithmetic))
     {
         cout << "Entered ARITHMETIC" << endl;
         Token op = getLispToken(current-1);
         Expr* a = lispExpression();
+        cout << "   Binary second expression start" << endl;
         Expr* b = lispExpression();
 
-        cout << "   Created Binary(arithmetic)" << endl;
+        cout << "   Created Binary(arithmetic):" << op.getTokenType() << endl;
         return new Binary(op, a, b);
     } 
     else if(match(cons))
@@ -196,10 +198,12 @@ lispParser::lispExpression()
         }
         
     }
+    /*
     else if(match(symnum))
     {
         cout << "Entered SYMNUM" << endl;
     }
+    */
 
     return lispAssignment();
 }
@@ -211,7 +215,7 @@ lispParser::lispAssignment()
 Expr* 
 lispParser::lispPrimary()
 {
-    cout << "   Entered lispPrimary" << endl;
+    cout << "   Entered lispPrimary:" << getLispToken(current).getTokenType()  << endl;
 
     list<TokenType>symnum, id, lispExpr;
     symnum.push_back(SYMBOL);
@@ -239,7 +243,7 @@ lispParser::lispPrimary()
         Expr* lispExpr = lispExpression();
 
         Token right_paren = consumeLispToken(RIGHT_PAREN, "Expect a ')' at the end of a lisp expression.");
-        return lispExpression();
+        return lispExpr;
     }
     
 

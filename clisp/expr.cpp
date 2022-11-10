@@ -27,9 +27,7 @@ class Grouping;
 class Literal;
 class Logical;
 class Set;
-class Super;
 class This;
-class Unary;
 class Variable;
 
 class Cons;
@@ -48,9 +46,7 @@ class Visitor : public Expr
         virtual string VisitLiteralExpr(Literal *expr) {return "";};
         virtual string VisitLogicalExpr(Logical *expr) {return "";};
         virtual string VisitSetExpr(Set *expr) {return "";};
-        virtual string VisitSuperExpr(Super *expr) {return "";};
         virtual string VisitThisExpr(This *expr) {return "";};
-        virtual string VisitUnaryExpr(Unary *expr) {return "";};
         virtual string VisitVariableExpr(Variable *expr) {return "";};
 
         virtual string VisitConsExpr(Cons *expr){return "";};
@@ -249,23 +245,6 @@ class Set : public Expr
 };
 
 
-class Super : public Expr
-{
-    public:
-        Token keyword;
-        Token method;
-
-        Super(Token k, Token m)
-        {   keyword = k;
-            method = m;
-        }
-
-        string Accept(Visitor *visitor)       
-        {   return visitor->VisitSuperExpr(this);}
-
-};
-
-
 class This : public Expr
 {
     public:
@@ -279,21 +258,6 @@ class This : public Expr
 
 };
 
-
-class Unary : public Expr
-{
-    public:
-        Token op;
-        Expr* right;
-
-        Unary(Token o, Expr* r)
-        {   op = o;
-            right = r;}
-
-        string Accept(Visitor *visitor)        
-        {   return visitor->VisitUnaryExpr(this);}
-
-};
 
 
 class Variable : public Expr

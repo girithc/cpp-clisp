@@ -1,6 +1,7 @@
 //refer appendix 2 to start
 #include <list>
 #include <string>
+#include <iostream>
 
 #include "expr.cpp"
 
@@ -143,6 +144,7 @@ class Print : public Stmt
 
         string Accept(VisitorStmt* visitor)
         {
+            cout << "VisitPrintStmt.Accept()" << endl;
             return visitor->VisitPrintStmt(this);
         }
 };
