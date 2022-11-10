@@ -12,7 +12,7 @@ class Stmt
 {
     public:
         virtual ~Stmt(){};
-        virtual string Accept(VisitorStmt *visitor){ return "";}
+        virtual list<string> Accept(VisitorStmt *visitor){ return {""};}
 };
 
 class Block;
@@ -29,15 +29,15 @@ class VisitorStmt : public Stmt
 {
     public:
         ~VisitorStmt(){}
-        virtual string VisitBlockStmt(Block* stmt){return "";};
-        virtual string VisitClassStmt(Class* stmt){return "";};
-        virtual string VisitExpressionStmt(Expression* stmt){return "";};
-        virtual string VisitFunctionStmt(Function* stmt){return "";};
-        virtual string VisitIfStmt(If* stmt){return "";};
-        virtual string VisitPrintStmt(Print* stmt){return "";};
-        virtual string VisitReturnStmt(Return* stmt){return "";};
-        virtual string VisitVarStmt(Var* stmt){return "";};
-        virtual string VisitWhileStmt(While* stmt){return "";};
+        virtual list<string> VisitBlockStmt(Block* stmt){return {""};};
+        virtual list<string> VisitClassStmt(Class* stmt){return {""};};
+        virtual list<string> VisitExpressionStmt(Expression* stmt){return {""};};
+        virtual list<string> VisitFunctionStmt(Function* stmt){return {""};};
+        virtual list<string> VisitIfStmt(If* stmt){return {""};};
+        virtual list<string> VisitPrintStmt(Print* stmt){return {""};};
+        virtual list<string> VisitReturnStmt(Return* stmt){return {""};};
+        virtual list<string> VisitVarStmt(Var* stmt){return {""};};
+        virtual list<string> VisitWhileStmt(While* stmt){return {""};};
 };
 
 class Block : public Stmt
@@ -50,7 +50,7 @@ class Block : public Stmt
             stmts = s;
         }
 
-        string Accept(VisitorStmt *visitor)
+        list<string> Accept(VisitorStmt *visitor)
         {
             return visitor->VisitBlockStmt(this);
         }
@@ -70,7 +70,7 @@ class Class : public Stmt
         methods = m;
     }
 
-    string Accept(VisitorStmt* visitor)
+    list<string> Accept(VisitorStmt* visitor)
     {
         return visitor->VisitClassStmt(this);
     }
@@ -86,7 +86,7 @@ class Expression : public Stmt
             expression = e;
         }
 
-        string Accept(VisitorStmt* visitor)
+        list<string> Accept(VisitorStmt* visitor)
         {
             return visitor->VisitExpressionStmt(this);
         }
@@ -106,7 +106,7 @@ class Function : public Stmt
             body = b;
         }
 
-        string Accept(VisitorStmt* visitor)
+        list<string> Accept(VisitorStmt* visitor)
         {
             return visitor->VisitFunctionStmt(this);
         }
@@ -126,7 +126,7 @@ class If : public Stmt
         elseBranch = eb;
     }
 
-    string Accept(VisitorStmt* visitor)
+    list<string> Accept(VisitorStmt* visitor)
     {
         return visitor->VisitIfStmt(this);
     }
@@ -142,7 +142,7 @@ class Print : public Stmt
             expression = e;
         }
 
-        string Accept(VisitorStmt* visitor)
+        list<string> Accept(VisitorStmt* visitor)
         {
             cout << "VisitPrintStmt.Accept()" << endl;
             return visitor->VisitPrintStmt(this);
@@ -161,7 +161,7 @@ class Return : public Stmt
             value = v;
         }
 
-        string Accept(VisitorStmt* visitor)
+        list<string> Accept(VisitorStmt* visitor)
         {
             return visitor->VisitReturnStmt(this);
         }
@@ -179,7 +179,7 @@ class Var : public Stmt
             init = i;
         }
 
-        string Accept(VisitorStmt* visitor)
+        list<string> Accept(VisitorStmt* visitor)
         {
             return visitor->VisitVarStmt(this);
         }
@@ -198,7 +198,7 @@ class While : public Stmt
             body = b;
         }
 
-        string Accept(VisitorStmt* visitor)
+        list<string> Accept(VisitorStmt* visitor)
         {
             return visitor->VisitWhileStmt(this);
         }

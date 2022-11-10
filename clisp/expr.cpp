@@ -15,7 +15,7 @@ class Expr
 {
     public:
         virtual ~Expr(){};
-        virtual string Accept(Visitor *visitor){return "";};
+        virtual list<string> Accept(Visitor *visitor){return {""};};
         //{accept(visitor);}s
         //virtual void accept(Visitor<R> *visitor);
 };
@@ -38,20 +38,20 @@ class Visitor : public Expr
 {
     public:
         ~Visitor() {}
-        virtual string VisitAssignExpr(Assign *expr) {return "";};
-        virtual string VisitBinaryExpr(Binary *expr) {return "";};
-        virtual string VisitCallExpr(Call *expr){return "";} ;
-        virtual string VisitGetExpr(Get *expr) {return "";};
-        virtual string VisitGroupingExpr(Grouping *xpr) {return "";};
-        virtual string VisitLiteralExpr(Literal *expr) {return "";};
-        virtual string VisitLogicalExpr(Logical *expr) {return "";};
-        virtual string VisitSetExpr(Set *expr) {return "";};
-        virtual string VisitThisExpr(This *expr) {return "";};
-        virtual string VisitVariableExpr(Variable *expr) {return "";};
+        virtual list<string> VisitAssignExpr(Assign *expr) {return {""};};
+        virtual list<string> VisitBinaryExpr(Binary *expr) {return {""};};
+        virtual list<string> VisitCallExpr(Call *expr){return {""};} ;
+        virtual list<string> VisitGetExpr(Get *expr) {return {""};};
+        virtual list<string> VisitGroupingExpr(Grouping *xpr) {return {""};};
+        virtual list<string> VisitLiteralExpr(Literal *expr) {return {""};};
+        virtual list<string> VisitLogicalExpr(Logical *expr) {return {""};};
+        virtual list<string> VisitSetExpr(Set *expr) {return {""};};
+        virtual list<string> VisitThisExpr(This *expr) {return {""};};
+        virtual list<string> VisitVariableExpr(Variable *expr) {return {""};};
 
-        virtual string VisitConsExpr(Cons *expr){return "";};
-        virtual string VisitCarExpr(Car *expr){return "";};
-        virtual string VisitCdrExpr(Cdr *expr){return "";};
+        virtual list<string> VisitConsExpr(Cons *expr){return {""};};
+        virtual list<string> VisitCarExpr(Car *expr){return {""};};
+        virtual list<string> VisitCdrExpr(Cdr *expr){return {""};};
 };
 
 
@@ -69,7 +69,7 @@ class Assign : public Expr
             value = v;
         }
 
-        string Accept(Visitor *visitor)        
+        list<string> Accept(Visitor *visitor)        
         {   return visitor->VisitAssignExpr(this);
         }
 };
@@ -88,7 +88,7 @@ class Binary : public Expr
             op = o;
         }
 
-        string Accept(Visitor *visitor)       
+        list<string> Accept(Visitor *visitor)       
         {   return visitor->VisitBinaryExpr(this);
         }
 };
@@ -108,7 +108,7 @@ class Cons : public Expr
             this->b = b;
         }
 
-        string Accept(Visitor *visitor)       
+        list<string> Accept(Visitor *visitor)       
         {   return visitor->VisitConsExpr(this);
         }
 };
@@ -126,7 +126,7 @@ class Car : public Expr
             this->a = a;
         }
 
-        string Accept(Visitor *visitor)       
+        list<string> Accept(Visitor *visitor)       
         {   return visitor->VisitCarExpr(this);
         }
 };
@@ -144,7 +144,7 @@ class Cdr : public Expr
             this->a = a;
         }
 
-        string Accept(Visitor *visitor)       
+        list<string> Accept(Visitor *visitor)       
         {   return visitor->VisitCdrExpr(this);
         }
 };
@@ -163,7 +163,7 @@ class Call : public Expr
             arguments = as;
         }
 
-        string Accept(Visitor *visitor)       
+        list<string> Accept(Visitor *visitor)       
         {   return visitor->VisitCallExpr(this);
         }
 
@@ -181,7 +181,7 @@ class Get : public Expr
             name = n;
         }
 
-        string Accept(Visitor *visitor)        
+        list<string> Accept(Visitor *visitor)        
         {   return visitor->VisitGetExpr(this);}
 
 };
@@ -192,7 +192,7 @@ class Grouping : public Expr
     public:
         Expr* expression;
         Grouping(Expr* e){   expression = e;}
-        string Accept(Visitor *visitor)        
+        list<string> Accept(Visitor *visitor)        
         {   return visitor->VisitGroupingExpr(this);}
 };
 
@@ -200,10 +200,10 @@ class Grouping : public Expr
 class Literal : public Expr
 {
     public:
-        string value;
-        Literal(string v)
+        list<string> value;
+        Literal(list<string> v)
         {   value = v;}
-        string Accept(Visitor *visitor)       
+        list<string> Accept(Visitor *visitor)       
         {   return visitor->VisitLiteralExpr(this);}
 };
 
@@ -221,7 +221,7 @@ class Logical : public Expr
             right = r;
         }
 
-        string Accept(Visitor *visitor)       
+        list<string> Accept(Visitor *visitor)       
         {   return visitor->VisitLogicalExpr(this);}
 
 };
@@ -239,7 +239,7 @@ class Set : public Expr
             value = v;
         }
 
-        string Accept(Visitor *visitor)
+        list<string> Accept(Visitor *visitor)
         {   return visitor->VisitSetExpr(this);}
 
 };
@@ -253,7 +253,7 @@ class This : public Expr
         This(Token k)
         {   keyword = k;}
 
-        string Accept(Visitor *visitor)        
+        list<string> Accept(Visitor *visitor)        
         {   return visitor->VisitThisExpr(this);}
 
 };
@@ -268,7 +268,7 @@ class Variable : public Expr
         Variable(Token n)
         {   name = n;}
 
-        string Accept(Visitor *visitor)      
+        list<string> Accept(Visitor *visitor)      
         {   return visitor->VisitVariableExpr(this);}
 
 };

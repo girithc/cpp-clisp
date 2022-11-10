@@ -228,7 +228,7 @@ lispParser::lispPrimary()
         cout << "       matched symnum: " << getLispToken(current-1).getTokenType()<< endl;
         Token symnumToken = getLispToken(current-1);
         cout << "       created LITERAL: " << symnumToken.getTokenLexeme() << endl;
-        return new Literal(symnumToken.getTokenLexeme());
+        return new Literal({symnumToken.getTokenLexeme()});
     }
     else if(match(id))
     {
@@ -246,10 +246,6 @@ lispParser::lispPrimary()
         return lispExpr;
     }
     
-
-
-
-
     Expr* exprplaceholder;
     return exprplaceholder;
 }

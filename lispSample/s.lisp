@@ -5,4 +5,5 @@
 
 //(set a (car (cdr b)))
 //(print (/ a b))
-(print "2")
+(set a 2)
+(print a)
