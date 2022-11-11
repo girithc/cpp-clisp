@@ -11,6 +11,7 @@ class Token
         Token(TokenType t, string lexeme, string literal, int line);
         string getTokenType();
         string getTokenLexeme();
+        string getTokenLiteral();
 
     private:
         TokenType t;
@@ -44,4 +45,10 @@ string
 Token::getTokenLexeme()
 {
     return this->lexeme;
+}
+
+string 
+Token::getTokenLiteral()
+{
+    return this->literal;
 }

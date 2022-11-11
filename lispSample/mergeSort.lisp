@@ -23,3 +23,7 @@
        (cons (car a) (merge (cdr a) b))
     't (cons (car b) (merge (cdr b) a))
 ))
+
+(define sum (a b)
+	(print a)
+)

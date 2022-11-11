@@ -5,5 +5,15 @@
 
 //(set a (car (cdr b)))
 //(print (/ a b))
-(set a 2)
-(print a)
+//(set a 2)
+//(set b 4)
+//(set c (cons a b))
+//(set d (cons c "u"))
+//(print a)
+//(print b)
+//(print c)
+//(print d)
+//(print (cdr d))
+//(print (car d))
+
+

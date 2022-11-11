@@ -35,12 +35,18 @@ class lispInterpreter: public Visitor, VisitorStmt
 
         list<string> VisitVariableExpr(Variable* expr) override;
         list<string> VisitLiteralExpr(Literal* expr) override;
+        list<string> VisitConsExpr(Cons* expr) override;
+        list<string> VisitCdrExpr(Cdr* expr) override;
+        list<string> VisitCarExpr(Car* expr) override;
 
         list<string> VisitPrintStmt(Print* stmt) override;
         list<string> VisitVarStmt(Var* stmt) override;
         
         //helper
         list<string> eval(Expr* expr);
+        list<string> cons(list<string> a, list<string> b);
+        list<string> cdr(list<string> a);
+        list<string> car(list<string> a);
 };
 
 //lispEnvironment
@@ -100,10 +106,34 @@ void lispInterpreter::interpretLispStmt(Stmt* lispStmt)
     cout << "   Enter interpretLispStmt" << endl;
     list<string> returnplaceholder = lispStmt->Accept(this);
 }
+
+//lispExpr
+list<string> lispInterpreter::VisitConsExpr(Cons* expr)
+{
+    cout << "Entered VisitConsExpr" << endl;
+    list<string> a = eval(expr->a);
+    list<string> b = eval(expr->b);
+    
+    return cons(a,b);
+    //return {""};
+}
+list<string> lispInterpreter::VisitCdrExpr(Cdr* expr)
+{
+    cout << "Entered VisitCdrExpr" << endl;
+    list<string> a = eval(expr->a);
+
+    return cdr(a);
+}
+list<string> lispInterpreter::VisitCarExpr(Car* expr)
+{
+    cout << "Entered VisitCarExpr" << endl;
+    list<string> a = eval(expr->a);
+    
+    return car(a);
+}
 list<string> lispInterpreter::VisitVariableExpr(Variable* expr) 
 {
     cout << "Entered VisitVariableExpr: " << endl;
-    
     return lispenv->getVariableValue(expr->name);
 }
 list<string> lispInterpreter::VisitLiteralExpr(Literal* expr) 
@@ -112,12 +142,17 @@ list<string> lispInterpreter::VisitLiteralExpr(Literal* expr)
     return expr->value;
 }
 
+//lispStmt
 list<string> lispInterpreter::VisitPrintStmt(Print* stmt)
 {
     cout << "   Enter VisitPrintStmt" << endl;
 
     list<string> value = eval(stmt->expression);
-    cout << "lisp>" << value.front() << endl;
+
+    cout << "lisp>" ;
+    for(auto iterator = value.begin(); iterator != value.end(); iterator++)
+        cout << "(" << (*iterator) << ")";
+    cout << endl;
 
     return {""};
 }
@@ -133,7 +168,28 @@ list<string> lispInterpreter::VisitVarStmt(Var* stmt)
     lispenv->define(stmt->name.getTokenLexeme(), variableValue);
     return {""};
 }
+
+//helper
 list<string> lispInterpreter::eval(Expr* expr)
 {
     return expr->Accept(this);
+}
+list<string> lispInterpreter::cons(list<string> a, list<string> b)
+{
+    for(auto iterator = b.begin(); iterator != b.end(); iterator++)
+    {
+        a.push_back(*iterator);
+    }
+    return a;
+}
+list<string> lispInterpreter::cdr(list<string> a)
+{
+    a.pop_front();
+    return a;
+}
+list<string> lispInterpreter::car(list<string> a)
+{
+    list<string> aprime; 
+    aprime.push_back(a.front());
+    return aprime;
 }

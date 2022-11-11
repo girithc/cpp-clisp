@@ -206,8 +206,13 @@ LispScanner::addToken(TokenType t)
 void 
 LispScanner::addToken(TokenType tokentype, string tokenLiteral)
 {
-    cout << "   AddToken(" << enum_str[tokentype] << "," << lispCode.substr(start,lenLispCode()) << "," << tokenLiteral << "," << line << ")" << endl;
-    lispTokens.push_back(*(new Token(tokentype,lispCode.substr(start,lenLispCode()),tokenLiteral,line)));
+    cout << "   AddToken(" << enum_str[tokentype] << "," << tokenLiteral << "," << lispCode.substr(start,lenLispCode()) << ","  << line << ")" << endl;
+    
+    if(enum_str[tokentype] == "SYMBOL")
+        lispTokens.push_back(*(new Token(tokentype,tokenLiteral,lispCode.substr(start,lenLispCode()),line)));
+    
+    else 
+        lispTokens.push_back(*(new Token(tokentype,lispCode.substr(start,lenLispCode()),tokenLiteral,line)));
     
 }
 
