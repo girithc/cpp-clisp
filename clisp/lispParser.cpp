@@ -21,8 +21,11 @@ class lispParser
 
     Stmt* declaration();
     Stmt* detail();
+    Stmt* functionDetail();
     Stmt* setDeclaration();
     Stmt* printDeclaration();
+    Stmt* functionDeclaration();
+    list<Stmt*> functionBlock();
 
     Expr* lispExpression();
     Expr* lispAssignment();
@@ -47,9 +50,7 @@ lispParser::lispParser(list<Token> t)
 {
     tokens = t;
 }
-
-list<Stmt*>
-lispParser::parse()
+list<Stmt*> lispParser::parse()
 {
     list<Stmt*> sList;
     while(isNotEnd())
@@ -60,9 +61,7 @@ lispParser::parse()
         
     return sList;
 }
-
-Stmt*
-lispParser::declaration()
+Stmt* lispParser::declaration()
 {
     cout << "Entered declaration: " << getLispToken(current-1).getTokenType() << endl;
     Token left_paren = consumeLispToken(LEFT_PAREN, "Expect '(' at the start of a statment.");
@@ -78,9 +77,7 @@ lispParser::declaration()
     //return stmtplaceholder;
     return stmtDetail;
 }
-
-Stmt*
-lispParser::detail()
+Stmt* lispParser::detail()
 {
     cout << "Entered detail" << endl;
 
@@ -103,15 +100,26 @@ lispParser::detail()
     else if(match(define))
     {
         cout << "Entered DEFINE" << endl;
+        return functionDeclaration();
     }
 
 
     Stmt* stmtplaceholder;
     return stmtplaceholder;
 }
-
-Stmt* 
-lispParser::setDeclaration()
+Stmt* lispParser::functionDetail()
+{
+    cout << "Entered function detail" << endl;
+    list<TokenType> print;
+    print.push_back(PRINT);
+    
+    if(match(print))
+    {
+        cout << "Entered PRINT" << endl;
+        return printDeclaration();
+    }
+}
+Stmt* lispParser::setDeclaration()
 {
     cout << "   Entered setDeclaration" << endl;
     
@@ -123,19 +131,49 @@ lispParser::setDeclaration()
     cout << "   created VAR" << endl;
     return new Var(id, idValue);
 }
+Stmt* lispParser::functionDeclaration()
+{
+    Token functionName = consumeLispToken(IDENTIFIER, "Expect function name after 'define'");
+    Token leftparen = consumeLispToken(LEFT_PAREN, "Expect '(' after function name.");
+    list<Token> functionParameters;
 
-Stmt*
-lispParser::printDeclaration()
+    list<TokenType> comma;
+    comma.push_back(COMMA);
+
+    if(!check(RIGHT_PAREN))
+    {
+        do
+        {
+            functionParameters.push_back(consumeLispToken(IDENTIFIER, "Expect a parameter name"));
+        } while (match(comma));
+    }
+    Token rightParen = consumeLispToken(RIGHT_PAREN, "Expect ')' in function declaration");
+    
+    list<Stmt*> functionStmts = functionBlock();
+
+    Stmt* placeholder;
+    return placeholder;
+}
+Stmt* lispParser::printDeclaration()
 {
     Expr* expr = lispExpression();
 
     cout << "   created PRINT" << endl;
     return new Print(expr);
 }
+list<Stmt*> lispParser::functionBlock()
+{
+    list<Stmt*> functionStmts;
+    while(isNotEnd())
+    {
+        if(!check(RIGHT_BRACE))
+        {
+            functionStmts.push_back(functionDetail());
+        }
+    }
+}
 
-
-Expr* 
-lispParser::lispExpression()
+Expr* lispParser::lispExpression()
 {
     list<TokenType> arithmetic, cons, cadr;// symnum;
     arithmetic.push_back(PLUS);
@@ -207,13 +245,11 @@ lispParser::lispExpression()
 
     return lispAssignment();
 }
-Expr*
-lispParser::lispAssignment()
+Expr* lispParser::lispAssignment()
 {
     return lispPrimary();
 }
-Expr* 
-lispParser::lispPrimary()
+Expr* lispParser::lispPrimary()
 {
     cout << "   Entered lispPrimary:" << getLispToken(current).getTokenType()  << endl;
 
@@ -250,36 +286,29 @@ lispParser::lispPrimary()
     return exprplaceholder;
 }
 
-
 //helper methods
 //@brief move 1 step forward. increment current.
-void
-lispParser::advanceLispToken()
+void lispParser::advanceLispToken()
 {
     if(isNotEnd()) this->current += 1;
     else throw invalid_argument("Reached end of file.");
 }
 //@brief end of file
-bool
-lispParser::isNotEnd()
+bool lispParser::isNotEnd()
 {
     //<< "       lookAhead: " << lookAhead().getTokenType() << endl;
     return (lookAhead().getTokenType() != "TokenEOF");
 }
-
 //@brief check if tokentype matches given tokentype 
-bool
-lispParser::check(TokenType tokentype)
+bool lispParser::check(TokenType tokentype)
 {
     cout << "   Entered check" << endl;
 
     if (isNotEnd()) return lookAhead().getTokenType() == enum_str[tokentype];
     else return false;
 }
-
 //@brief check if tokentype matches list of tokentypes 
-bool
-lispParser::match(list<TokenType> tokentypes)
+bool lispParser::match(list<TokenType> tokentypes)
 {
     cout << "   Entered match" << endl << "    ";
 
@@ -294,10 +323,8 @@ lispParser::match(list<TokenType> tokentypes)
     }
     return false;
 }
-
 //@brief look for matching tokens
-Token
-lispParser::lookAhead()
+Token lispParser::lookAhead()
 {
     list<Token>::iterator i;
 
@@ -309,10 +336,8 @@ lispParser::lookAhead()
     }
     return Token();
 }
-
 //@brief get lisp token at index provided
-Token 
-lispParser::getLispToken(int index)
+Token lispParser::getLispToken(int index)
 {
     list<Token>::iterator i;
     int tokenIndexCounter = 0;
@@ -324,11 +349,9 @@ lispParser::getLispToken(int index)
     }
     return Token();
 }
-
 //@brief check if tokentype from user matches expected tokentype. move 1 step forward. 
         //else throw error.
-Token 
-lispParser::consumeLispToken(TokenType tokentype, string message)
+Token lispParser::consumeLispToken(TokenType tokentype, string message)
 {
     cout << "   Entered consumeLispToken" << endl << "  ";
 
