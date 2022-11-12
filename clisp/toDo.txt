@@ -1,1 +1,2 @@
-work on lispFunction
+replace string with struct lispVar (refer to lispSample/any.cpp)
+complete cond
