@@ -153,13 +153,12 @@ class Cdr : public Expr
 class Call : public Expr
 {
     public:
-        Expr* callee;
-        Token paren;
+        Token callee;
         list<Expr*> arguments;
 
-        Call(Expr* c, Token p, list<Expr*> as)
-        {   callee = c;
-            this->paren = p;
+        Call(Token c, list<Expr*> as)
+        {   
+            callee = c;
             arguments = as;
         }
 

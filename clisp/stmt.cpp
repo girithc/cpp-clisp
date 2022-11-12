@@ -144,7 +144,6 @@ class Print : public Stmt
 
         list<string> Accept(VisitorStmt* visitor)
         {
-            cout << "VisitPrintStmt.Accept()" << endl;
             return visitor->VisitPrintStmt(this);
         }
 };
@@ -152,12 +151,10 @@ class Print : public Stmt
 class Return : public Stmt
 {
     public:
-        Token keyword;
         Expr* value;
 
-        Return(Token k, Expr* v)
+        Return(Expr* v)
         {
-            keyword = k;
             value = v;
         }
 

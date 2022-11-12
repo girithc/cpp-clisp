@@ -25,6 +25,8 @@ class lispParser
     Stmt* setDeclaration();
     Stmt* printDeclaration();
     Stmt* functionDeclaration();
+    Stmt* functionInstanceDeclaration();
+    Stmt* returnDeclaration();
     list<Stmt*> functionBlock();
 
     Expr* lispExpression();
@@ -81,11 +83,12 @@ Stmt* lispParser::detail()
 {
     cout << "Entered detail" << endl;
 
-    list<TokenType> set, print, define;
+    list<TokenType> set, print, define, functionCall;
 
     set.push_back(SET);
     print.push_back(PRINT);
     define.push_back(DEFINE);
+    functionCall.push_back(IDENTIFIER);
     
     if(match(set))
     {
@@ -102,6 +105,12 @@ Stmt* lispParser::detail()
         cout << "Entered DEFINE" << endl;
         return functionDeclaration();
     }
+    else if(match(functionCall))
+    {
+        cout << "Entered FunctionCall" << endl;
+        return functionInstanceDeclaration();
+        exit(1);
+    }
 
 
     Stmt* stmtplaceholder;
@@ -110,14 +119,46 @@ Stmt* lispParser::detail()
 Stmt* lispParser::functionDetail()
 {
     cout << "Entered function detail" << endl;
-    list<TokenType> print;
+    list<TokenType> print, cadr, cons;
     print.push_back(PRINT);
+    cadr.push_back(CAR);
+    cadr.push_back(CDR);
+    cons.push_back(CONS);
     
     if(match(print))
     {
         cout << "Entered PRINT" << endl;
         return printDeclaration();
     }
+    else if(match(cadr))
+    {
+        Token cadr = getLispToken(current-1);
+        Expr* a = lispExpression();
+        if(cadr.getTokenType() == enum_str[CAR])
+        {
+            return new Return(new Car(cadr,a));
+        }   
+        else //cdr
+        {
+            return new Return(new Cdr(cadr, a));
+        }
+    }
+    else if(match(cons))
+    {
+        cout << "Entered CONS" << endl;
+
+        Token cons = getLispToken(current-1);
+        //cout << "   token:" << cons.getTokenType() << endl;
+        Expr* a = lispExpression();
+        Expr* b = lispExpression();
+
+        return new Return(new Cons(cons, a, b));
+
+    }
+
+
+
+    return returnDeclaration();
 }
 Stmt* lispParser::setDeclaration()
 {
@@ -131,29 +172,6 @@ Stmt* lispParser::setDeclaration()
     cout << "   created VAR" << endl;
     return new Var(id, idValue);
 }
-Stmt* lispParser::functionDeclaration()
-{
-    Token functionName = consumeLispToken(IDENTIFIER, "Expect function name after 'define'");
-    Token leftparen = consumeLispToken(LEFT_PAREN, "Expect '(' after function name.");
-    list<Token> functionParameters;
-
-    list<TokenType> comma;
-    comma.push_back(COMMA);
-
-    if(!check(RIGHT_PAREN))
-    {
-        do
-        {
-            functionParameters.push_back(consumeLispToken(IDENTIFIER, "Expect a parameter name"));
-        } while (match(comma));
-    }
-    Token rightParen = consumeLispToken(RIGHT_PAREN, "Expect ')' in function declaration");
-    
-    list<Stmt*> functionStmts = functionBlock();
-
-    Stmt* placeholder;
-    return placeholder;
-}
 Stmt* lispParser::printDeclaration()
 {
     Expr* expr = lispExpression();
@@ -161,16 +179,60 @@ Stmt* lispParser::printDeclaration()
     cout << "   created PRINT" << endl;
     return new Print(expr);
 }
+Stmt* lispParser::functionDeclaration()
+{
+    cout << "   Entered functionDeclaration" << endl;
+    Token functionName = consumeLispToken(IDENTIFIER, "Expect function name after 'define'");
+    Token leftparen = consumeLispToken(LEFT_PAREN, "Expect '(' after function name.");
+    list<Token> functionParameters;
+
+    while(!check(RIGHT_PAREN))
+    {
+        cout << "       consume Function Parameter" << endl;
+        functionParameters.push_back(consumeLispToken(IDENTIFIER, "Expect a parameter name"));
+    }
+    Token rightParen = consumeLispToken(RIGHT_PAREN, "Expect ')' in function declaration");
+    
+    list<Stmt*> functionStmts = functionBlock();
+
+    cout << "   created FUNCTION" << endl;
+    return new Function(functionName,functionParameters,functionStmts);
+    //Stmt* placeholder;
+    //return placeholder;
+}
+Stmt* lispParser::functionInstanceDeclaration()
+{
+    //cout << getLispToken(current-1).getTokenLexeme() << endl;
+    cout << "   Enter functionInstanceDeclaration" << endl;
+    Token functionName = getLispToken(current-1);
+    list<Expr*> functionArguments;
+    while(!check(RIGHT_PAREN))
+    {
+        functionArguments.push_back(lispExpression());
+    }
+    cout << "   Created Expression(Function Instance)" << endl;
+    return new Expression(new Call(functionName, functionArguments));
+}
+Stmt* lispParser::returnDeclaration()
+{
+    Expr* returnValue = lispExpression();
+
+    return new Return(returnValue);
+}
 list<Stmt*> lispParser::functionBlock()
 {
+    cout << "   Enter functionBlock" << endl;
     list<Stmt*> functionStmts;
-    while(isNotEnd())
+    while(isNotEnd() && !check(RIGHT_PAREN))
     {
-        if(!check(RIGHT_BRACE))
-        {
-            functionStmts.push_back(functionDetail());
-        }
+        Token leftparen = consumeLispToken(LEFT_PAREN,"Expect a '(' at the start of a function statement");
+        functionStmts.push_back(functionDetail());
+        Token rightparen = consumeLispToken(RIGHT_PAREN,"Expect a ')' at the start of a function statement");
     }
+    return functionStmts;
+
+    list<Stmt*> stmtsplaceholder;
+    return stmtsplaceholder;
 }
 
 Expr* lispParser::lispExpression()

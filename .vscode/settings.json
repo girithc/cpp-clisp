@@ -78,5 +78,6 @@
         "funname",
         "ISNIL",
         "ISSYMBOL"
-    ]
+    ],
+    "C_Cpp.errorSquiggles": "Disabled"
 }
