@@ -36,8 +36,7 @@ void print(vector<struct lispVar>* a)
 
 int main()
 {
-    cout << "Hello1" << endl;
-
+    //cout << "Hello1" << endl;
     vector<struct lispVar>* a = new vector<struct lispVar>();
 
     struct lispVar a1;
@@ -45,7 +44,7 @@ int main()
     a1.next = NULL;
     a->push_back(a1);
 
-    cout << "Hello2" << endl;
+    //cout << "Hello2" << endl;
 
     struct lispVar a2;
     a2.value = "a2";
@@ -58,7 +57,7 @@ int main()
     a11.next = NULL;
     b->push_back(a11);
 
-    cout << "Hello" << endl;
+    //cout << "Hello" << endl;
     a->at(0).next = b;
 
     if(a->at(0).next) cout << "Multidimensional Vector:" << a->at(0).next->at(0).value << endl;
