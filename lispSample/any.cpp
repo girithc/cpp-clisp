@@ -1,31 +1,67 @@
 #include <iostream>
 #include <string>
-#include <list>
+#include <vector>
 #include <iterator>
 
 using namespace std;
 
+void print(vector<struct lispVar>* a);
+
 struct lispVar
 {
     string value;
-    lispVar* next;
+    vector<lispVar>* next;
 } lispVar;
+
+void printList(vector<struct lispVar>* a)
+{
+    cout << "( ";
+    print(a);
+    cout << " )" << endl;
+}
+
+void print(vector<struct lispVar>* a)
+{
+    for(auto it = a->begin(); it != a->end(); it++)
+    {
+        if((*it).next)
+        {
+            cout << "( " << (*it).value << " ";
+            print((*it).next);
+            cout << ") ";
+        }
+        else cout << (*it).value << " ";
+    }
+}
 
 int main()
 {
-    list<struct lispVar> stringlist;
+    cout << "Hello1" << endl;
 
-   struct lispVar lv_v2;
-   lv_v2.value = "world";
-   lv_v2.next = NULL;
+    vector<struct lispVar>* a = new vector<struct lispVar>();
 
-    struct lispVar lv;
-    lv.value = "hello";
-    lv.next = &lv_v2;
-    stringlist.push_back(lv);
-    for(auto it = stringlist.begin(); it != stringlist.end(); it++)
-    {
-        cout << "Hello: " << it->value << endl;
-        if(it->next) cout << "Hello: " << it->next->value << endl;
-    }
+    struct lispVar a1;
+    a1.value = "a1";
+    a1.next = NULL;
+    a->push_back(a1);
+
+    cout << "Hello2" << endl;
+
+    struct lispVar a2;
+    a2.value = "a2";
+    a2.next = NULL;
+    a->push_back(a2);
+
+    vector<struct lispVar>* b = new vector<struct lispVar>();
+    struct lispVar a11;
+    a11.value = "a11";
+    a11.next = NULL;
+    b->push_back(a11);
+
+    cout << "Hello" << endl;
+    a->at(0).next = b;
+
+    if(a->at(0).next) cout << "Multidimensional Vector:" << a->at(0).next->at(0).value << endl;
+    printList(a);
+    
 }
