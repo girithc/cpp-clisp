@@ -178,6 +178,7 @@ list<string> lispFunction::lispFunctionCall(lispInterpreter* lispFunctionInterpr
     catch(lispFunctionReturn* lispFunctionReturnValue)
     {
         cout << "lispFunction Return value found." << endl;
+        return lispFunctionReturnValue->lispFunctionReturnValue;
     }
     
     return {""};

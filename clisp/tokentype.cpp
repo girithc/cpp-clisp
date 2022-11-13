@@ -42,3 +42,9 @@ const string enum_str[] =
         "ISNUMBER", "ISSYMBOL", "ISNIL",
         "TokenEOF",
 };
+
+struct lispVar 
+{
+        string value;
+        list<lispVar>* nextLispVar;
+};

@@ -330,9 +330,24 @@ Expr* lispParser::lispPrimary()
     }
     else if(match(id))
     {
-        cout << "       matched identifier: " << getLispToken(current-1).getTokenLexeme()<< endl;
-        cout << "       created VARIABLE" << endl;
-        return new Variable(getLispToken(current-1));
+        cout << "       matched identifier: " << getLispToken(current-1).getTokenLexeme()<<getLispToken(current-2).getTokenLexeme() << endl;
+        
+        if(getLispToken(current-2).getTokenType() == enum_str[LEFT_PAREN])
+        {
+            cout << "       created CALL" << endl;
+            Token callee = getLispToken(current-1);
+            list<Expr*> functionArguments;
+            while(!check(RIGHT_PAREN))
+            {
+                functionArguments.push_back(lispExpression());
+            }
+            return new Call(callee, functionArguments);
+        }
+        else
+        {   
+            cout << "       created VARIABLE" << endl;
+            return new Variable(getLispToken(current-1));
+        }
     }
     else if (match(lispExpr))
     {
