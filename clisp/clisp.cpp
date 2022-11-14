@@ -52,10 +52,10 @@ Lisp::run(std::string lispCode)
     list<Stmt*> lispStmts = parser.parse();
     cout << "---- Parser completed ----" << endl << endl;
 
-    cout << endl << "---- Start Interpreter ----" << endl;
-    lispInterpreter* interpreter = new lispInterpreter(lispStmts);
-    interpreter->interpret();
-    cout << "---- Interpreter completed ----" << endl << endl;
+    //cout << endl << "---- Start Interpreter ----" << endl;
+    //lispInterpreter* interpreter = new lispInterpreter(lispStmts);
+    //interpreter->interpret();
+    //cout << "---- Interpreter completed ----" << endl << endl;
 }
 
 

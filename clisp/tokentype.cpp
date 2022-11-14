@@ -1,4 +1,5 @@
 #include <string>
+#include <vector>
 using namespace std;
 
 enum TokenType 
@@ -46,5 +47,5 @@ const string enum_str[] =
 struct lispVar 
 {
         string value;
-        list<lispVar>* nextLispVar;
+        vector<lispVar> next;
 };

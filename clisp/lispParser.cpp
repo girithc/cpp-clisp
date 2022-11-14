@@ -1,9 +1,11 @@
-
-#include "lispInterpreter.cpp"
+//#include "lispInterpreter.cpp"
 
 #include <string>
 #include <iterator>
 #include <list>
+#include "stmt.cpp"
+#include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -136,10 +138,12 @@ Stmt* lispParser::functionDetail()
         Expr* a = lispExpression();
         if(cadr.getTokenType() == enum_str[CAR])
         {
+            cout << "   created RETURN(Car)" << endl;
             return new Return(new Car(cadr,a));
         }   
         else //cdr
         {
+            cout << "   created RETURN(Cdr)" << endl;
             return new Return(new Cdr(cadr, a));
         }
     }
@@ -152,6 +156,7 @@ Stmt* lispParser::functionDetail()
         Expr* a = lispExpression();
         Expr* b = lispExpression();
 
+        cout << "   created RETURN(Cons)" << endl;
         return new Return(new Cons(cons, a, b));
 
     }
@@ -326,11 +331,18 @@ Expr* lispParser::lispPrimary()
         cout << "       matched symnum: " << getLispToken(current-1).getTokenType()<< endl;
         Token symnumToken = getLispToken(current-1);
         cout << "       created LITERAL: " << symnumToken.getTokenLexeme() << endl;
-        return new Literal({symnumToken.getTokenLexeme()});
+
+        //struct lispVar lv;
+        //lv.value = symnumToken.getTokenLexeme();
+        
+        //vector<struct lispVar> lispVarVector; 
+        //lispVarVector.push_back(lv);
+
+        return new Literal(symnumToken.getTokenLexeme());
     }
     else if(match(id))
     {
-        cout << "       matched identifier: " << getLispToken(current-1).getTokenLexeme()<<getLispToken(current-2).getTokenLexeme() << endl;
+        cout << "       matched identifier: " << getLispToken(current-1).getTokenLexeme() << endl;
         
         if(getLispToken(current-2).getTokenType() == enum_str[LEFT_PAREN])
         {
@@ -341,6 +353,7 @@ Expr* lispParser::lispPrimary()
             {
                 functionArguments.push_back(lispExpression());
             }
+            cout << "       created Call" << endl;
             return new Call(callee, functionArguments);
         }
         else

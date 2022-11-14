@@ -3,6 +3,7 @@
 #include <list>
 #include <string.h>
 #include <string>
+#include <vector>
 
 
 #include "token.cpp"
@@ -15,7 +16,7 @@ class Expr
 {
     public:
         virtual ~Expr(){};
-        virtual list<string> Accept(Visitor *visitor){return {""};};
+        virtual vector<struct lispVar> Accept(Visitor *visitor){vector<struct lispVar> lv; return lv;};
         //{accept(visitor);}s
         //virtual void accept(Visitor<R> *visitor);
 };
@@ -38,20 +39,20 @@ class Visitor : public Expr
 {
     public:
         ~Visitor() {}
-        virtual list<string> VisitAssignExpr(Assign *expr) {return {""};};
-        virtual list<string> VisitBinaryExpr(Binary *expr) {return {""};};
-        virtual list<string> VisitCallExpr(Call *expr){return {""};} ;
-        virtual list<string> VisitGetExpr(Get *expr) {return {""};};
-        virtual list<string> VisitGroupingExpr(Grouping *xpr) {return {""};};
-        virtual list<string> VisitLiteralExpr(Literal *expr) {return {""};};
-        virtual list<string> VisitLogicalExpr(Logical *expr) {return {""};};
-        virtual list<string> VisitSetExpr(Set *expr) {return {""};};
-        virtual list<string> VisitThisExpr(This *expr) {return {""};};
-        virtual list<string> VisitVariableExpr(Variable *expr) {return {""};};
+        virtual vector<struct lispVar> VisitAssignExpr(Assign *expr) {vector<struct lispVar> lv; return lv;};
+        virtual vector<struct lispVar> VisitBinaryExpr(Binary *expr) {vector<struct lispVar> lv; return lv;};
+        virtual vector<struct lispVar> VisitCallExpr(Call *expr) {vector<struct lispVar> lv; return lv;};
+        virtual vector<struct lispVar> VisitGetExpr(Get *expr) {vector<struct lispVar> lv; return lv;};
+        virtual vector<struct lispVar> VisitGroupingExpr(Grouping *xpr) {vector<struct lispVar> lv; return lv;};
+        virtual vector<struct lispVar> VisitLiteralExpr(Literal *expr) {vector<struct lispVar> lv; return lv;};
+        virtual vector<struct lispVar> VisitLogicalExpr(Logical *expr) {vector<struct lispVar> lv; return lv;};
+        virtual vector<struct lispVar> VisitSetExpr(Set *expr) {vector<struct lispVar> lv; return lv;};
+        virtual vector<struct lispVar> VisitThisExpr(This *expr) {vector<struct lispVar> lv; return lv;};
+        virtual vector<struct lispVar> VisitVariableExpr(Variable *expr) {vector<struct lispVar> lv; return lv;};
 
-        virtual list<string> VisitConsExpr(Cons *expr){return {""};};
-        virtual list<string> VisitCarExpr(Car *expr){return {""};};
-        virtual list<string> VisitCdrExpr(Cdr *expr){return {""};};
+        virtual vector<struct lispVar> VisitConsExpr(Cons *expr){vector<struct lispVar> lv; return lv;};
+        virtual vector<struct lispVar> VisitCarExpr(Car *expr){vector<struct lispVar> lv; return lv;};
+        virtual vector<struct lispVar> VisitCdrExpr(Cdr *expr){vector<struct lispVar> lv; return lv;};
 };
 
 
@@ -69,7 +70,7 @@ class Assign : public Expr
             value = v;
         }
 
-        list<string> Accept(Visitor *visitor)        
+        vector<struct lispVar> Accept(Visitor *visitor)        
         {   return visitor->VisitAssignExpr(this);
         }
 };
@@ -88,7 +89,7 @@ class Binary : public Expr
             op = o;
         }
 
-        list<string> Accept(Visitor *visitor)       
+        vector<struct lispVar> Accept(Visitor *visitor)       
         {   return visitor->VisitBinaryExpr(this);
         }
 };
@@ -108,7 +109,7 @@ class Cons : public Expr
             this->b = b;
         }
 
-        list<string> Accept(Visitor *visitor)       
+        vector<struct lispVar> Accept(Visitor *visitor)       
         {   return visitor->VisitConsExpr(this);
         }
 };
@@ -126,7 +127,7 @@ class Car : public Expr
             this->a = a;
         }
 
-        list<string> Accept(Visitor *visitor)       
+        vector<struct lispVar> Accept(Visitor *visitor)       
         {   return visitor->VisitCarExpr(this);
         }
 };
@@ -144,7 +145,7 @@ class Cdr : public Expr
             this->a = a;
         }
 
-        list<string> Accept(Visitor *visitor)       
+        vector<struct lispVar> Accept(Visitor *visitor)       
         {   return visitor->VisitCdrExpr(this);
         }
 };
@@ -162,7 +163,7 @@ class Call : public Expr
             arguments = as;
         }
 
-        list<string> Accept(Visitor *visitor)       
+        vector<struct lispVar> Accept(Visitor *visitor)       
         {   return visitor->VisitCallExpr(this);
         }
 
@@ -180,7 +181,7 @@ class Get : public Expr
             name = n;
         }
 
-        list<string> Accept(Visitor *visitor)        
+        vector<struct lispVar> Accept(Visitor *visitor)        
         {   return visitor->VisitGetExpr(this);}
 
 };
@@ -191,7 +192,7 @@ class Grouping : public Expr
     public:
         Expr* expression;
         Grouping(Expr* e){   expression = e;}
-        list<string> Accept(Visitor *visitor)        
+        vector<struct lispVar> Accept(Visitor *visitor)        
         {   return visitor->VisitGroupingExpr(this);}
 };
 
@@ -199,10 +200,10 @@ class Grouping : public Expr
 class Literal : public Expr
 {
     public:
-        list<string> value;
-        Literal(list<string> v)
+        string value;
+        Literal(string v)
         {   value = v;}
-        list<string> Accept(Visitor *visitor)       
+        vector<struct lispVar> Accept(Visitor *visitor)       
         {   return visitor->VisitLiteralExpr(this);}
 };
 
@@ -220,7 +221,7 @@ class Logical : public Expr
             right = r;
         }
 
-        list<string> Accept(Visitor *visitor)       
+        vector<struct lispVar> Accept(Visitor *visitor)       
         {   return visitor->VisitLogicalExpr(this);}
 
 };
@@ -238,7 +239,7 @@ class Set : public Expr
             value = v;
         }
 
-        list<string> Accept(Visitor *visitor)
+        vector<struct lispVar> Accept(Visitor *visitor)
         {   return visitor->VisitSetExpr(this);}
 
 };
@@ -252,7 +253,7 @@ class This : public Expr
         This(Token k)
         {   keyword = k;}
 
-        list<string> Accept(Visitor *visitor)        
+        vector<struct lispVar> Accept(Visitor *visitor)        
         {   return visitor->VisitThisExpr(this);}
 
 };
@@ -267,7 +268,7 @@ class Variable : public Expr
         Variable(Token n)
         {   name = n;}
 
-        list<string> Accept(Visitor *visitor)      
+        vector<struct lispVar> Accept(Visitor *visitor)      
         {   return visitor->VisitVariableExpr(this);}
 
 };
