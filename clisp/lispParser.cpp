@@ -346,7 +346,7 @@ Expr* lispParser::lispPrimary()
         
         if(getLispToken(current-2).getTokenType() == enum_str[LEFT_PAREN])
         {
-            cout << "       created CALL" << endl;
+            cout << "       entered CALL" << endl;
             Token callee = getLispToken(current-1);
             list<Expr*> functionArguments;
             while(!check(RIGHT_PAREN))
