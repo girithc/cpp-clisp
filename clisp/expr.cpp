@@ -200,9 +200,13 @@ class Grouping : public Expr
 class Literal : public Expr
 {
     public:
-        string value;
+        vector<struct lispVar> literalValue;
         Literal(string v)
-        {   value = v;}
+        {
+            struct lispVar lv;
+            lv.value = v;
+            this->literalValue.push_back(lv);
+        }
         vector<struct lispVar> Accept(Visitor *visitor)       
         {   return visitor->VisitLiteralExpr(this);}
 };

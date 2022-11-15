@@ -5,6 +5,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <stdexcept>
+#include <vector>
 
 using namespace std;
 
@@ -16,15 +17,15 @@ class lispEnvironment
     public:
         lispEnvironment();
         lispEnvironment(lispEnvironment* e);
-        void define(string variable, list<string> variableValue);
+        void define(string variable, vector<struct lispVar> variableValue);
         void defineLispFunction(string function, lispFunction* functionValue);
-        list<string> getVariableValue(Token variable);
+        vector<struct lispVar> getVariableValue(Token variable);
         lispFunction* getLispFunction(string functionName);
         void print(); 
         
     private:
         lispEnvironment* enclosing;
-        unordered_map <string,list<string>> lispMap;
+        unordered_map <string,vector<struct lispVar>> lispMap;
         unordered_map <string, lispFunction*> lispFunctionMap;   
             
 };
@@ -33,10 +34,10 @@ class lispFunction
     public:
         Function* init;
         lispFunction(Function* init, lispEnvironment* lispFunctionEnvironment);
-        list<string> lispFunctionCall(lispInterpreter* lispInterpreter,list<list<string>> lispFunctionArguments);
+        vector<struct lispVar> lispFunctionCall(lispInterpreter* lispInterpreter,list<vector<struct lispVar>> lispFunctionArguments);
     
     private:
-        list<string> lispFunctionReturnValue;
+        vector<struct lispVar> lispFunctionReturnValue;
         lispEnvironment* lispFunctionEnvironment;
 
 };
@@ -46,37 +47,37 @@ class lispInterpreter: public Visitor, VisitorStmt
         lispInterpreter(list<Stmt*> lispStmts);
         void interpret();
         void interpretLispStmt(Stmt* lispStmt);
-        list<string> executeFunctionBlock(list<Stmt*> lispFunctionStmts, lispEnvironment* lispenv);
+        vector<struct lispVar> executeFunctionBlock(list<Stmt*> lispFunctionStmts, lispEnvironment* lispenv);
 
     private:
         lispEnvironment* lispenv;
         list<Stmt*> lispStmts;
 
-        list<string> VisitCallExpr(Call* expr) override;
-        list<string> VisitVariableExpr(Variable* expr) override;
-        list<string> VisitLiteralExpr(Literal* expr) override;
-        list<string> VisitConsExpr(Cons* expr) override;
-        list<string> VisitCdrExpr(Cdr* expr) override;
-        list<string> VisitCarExpr(Car* expr) override;
+        vector<struct lispVar> VisitCallExpr(Call* expr) override;
+        vector<struct lispVar> VisitVariableExpr(Variable* expr) override;
+        vector<struct lispVar> VisitLiteralExpr(Literal* expr) override;
+        vector<struct lispVar> VisitConsExpr(Cons* expr) override;
+        vector<struct lispVar> VisitCdrExpr(Cdr* expr) override;
+        vector<struct lispVar> VisitCarExpr(Car* expr) override;
 
-        list<string> VisitPrintStmt(Print* stmt) override;
-        list<string> VisitVarStmt(Var* stmt) override;
-        list<string> VisitFunctionStmt(Function* stmt) override;
-        list<string> VisitExpressionStmt(Expression* stmt) override;
-        list<string> VisitReturnStmt(Return* stmt) override;
+        vector<struct lispVar> VisitPrintStmt(Print* stmt) override;
+        vector<struct lispVar> VisitVarStmt(Var* stmt) override;
+        vector<struct lispVar> VisitFunctionStmt(Function* stmt) override;
+        vector<struct lispVar> VisitExpressionStmt(Expression* stmt) override;
+        vector<struct lispVar> VisitReturnStmt(Return* stmt) override;
 
         //helper
-        list<string> eval(Expr* expr);
-        list<string> cons(list<string> a, list<string> b);
-        list<string> cdr(list<string> a);
-        list<string> car(list<string> a);
+        vector<struct lispVar> eval(Expr* expr);
+        vector<struct lispVar> cons(vector<struct lispVar> a, vector<struct lispVar> b);
+        vector<struct lispVar> cdr(vector<struct lispVar> a);
+        vector<struct lispVar> car(vector<struct lispVar> a);
 };
 class lispFunctionReturn
 {
     public:
         Token token;
-        list<string> lispFunctionReturnValue;
-        lispFunctionReturn(list<string> value){lispFunctionReturnValue = value; }
+        vector<struct lispVar> lispFunctionReturnValue;
+        lispFunctionReturn(vector<struct lispVar> value){lispFunctionReturnValue = value; }
         lispFunctionReturn(Token t, string message);
 };
 //lispEnvironment
@@ -88,9 +89,9 @@ lispEnvironment::lispEnvironment(lispEnvironment* e)
 {
     enclosing = e;
 }
-void lispEnvironment::define(string variable, list<string> variableValue)
+void lispEnvironment::define(string variable, vector<struct lispVar> variableValue)
 {
-    cout << "   Enter define:" << variable << " = " << variableValue.front() << endl;
+    cout << "   Enter define:" << variable << " = " << variableValue.front().value << endl;
     lispMap.insert({{variable, variableValue}});
 
     //print();
@@ -99,14 +100,16 @@ void lispEnvironment::defineLispFunction(string function, lispFunction* function
 {
     //define lispVariable
     cout << "   Enter defineLoxFunction:" << function << endl;
-    list<string> functionVariableValue;
-    functionVariableValue.push_back("<lispFunction>");
+    vector<struct lispVar> functionVariableValue;
+    struct lispVar lv;
+    lv.value = "<lispFunction>";
+    functionVariableValue.push_back(lv);
     define(function, functionVariableValue);
 
     //define lispFunction
     lispFunctionMap.insert({{function, functionValue}});
 }
-list<string> lispEnvironment::getVariableValue(Token variable)
+vector<struct lispVar> lispEnvironment::getVariableValue(Token variable)
 {
     //print();
     cout << "   Entered getVariableValue" << endl;
@@ -143,7 +146,7 @@ void lispEnvironment::print()
 {
     cout << endl;
     for(auto it = lispMap.begin(); it != lispMap.end(); it++)
-        cout << it->first << ", " << it->second.front() << endl;
+        cout << it->first << ", " << it->second.front().value << endl;
     cout << endl;
 }
 
@@ -154,13 +157,13 @@ lispFunction::lispFunction(Function* init, lispEnvironment* lispFunctionEnvironm
     this->lispFunctionEnvironment = lispFunctionEnvironment;
     //this->lispFunctionEnvironment->print();
 }
-list<string> lispFunction::lispFunctionCall(lispInterpreter* lispFunctionInterpreter, list<list<string>> lispFunctionArguments)
+vector<struct lispVar> lispFunction::lispFunctionCall(lispInterpreter* lispFunctionInterpreter, list<vector<struct lispVar>> lispFunctionArguments)
 {
     //new lispFunction environment
     cout << "   Enter lispFunctionCall" << endl;
     lispEnvironment* lispenv = new lispEnvironment(lispFunctionEnvironment);
     list<Token>::iterator parametersIterator = init->params.begin();
-    list<list<string>>::iterator parametersValueIterator = lispFunctionArguments.begin();
+    list<vector<struct lispVar>>::iterator parametersValueIterator = lispFunctionArguments.begin();
 
     for(int x = 0; x < init->params.size(); x++)
     {
@@ -181,7 +184,9 @@ list<string> lispFunction::lispFunctionCall(lispInterpreter* lispFunctionInterpr
         return lispFunctionReturnValue->lispFunctionReturnValue;
     }
     
-    return {""};
+    
+    vector<struct lispVar> placeholder;
+    return placeholder;
 }
 
 //lispInterpreter
@@ -211,11 +216,11 @@ void lispInterpreter::interpret()
 void lispInterpreter::interpretLispStmt(Stmt* lispStmt)
 {
     cout << "   Enter interpretLispStmt" << endl;
-    list<string> returnplaceholder = lispStmt->Accept(this);
+    vector<struct lispVar> returnplaceholder = lispStmt->Accept(this);
 }
-list<string> lispInterpreter::executeFunctionBlock(list<Stmt*> lispFunctionStmts, lispEnvironment* lispenv)
+vector<struct lispVar> lispInterpreter::executeFunctionBlock(list<Stmt*> lispFunctionStmts, lispEnvironment* lispenv)
 {
-    list<string> result;
+    vector<struct lispVar> result;
     cout << "       Enter executeFunctionBlock: " << lispFunctionStmts.size() << endl;
     //lispenv->print();
     this->lispenv = lispenv;
@@ -223,40 +228,42 @@ list<string> lispInterpreter::executeFunctionBlock(list<Stmt*> lispFunctionStmts
     {
         result =(*it)->Accept(this);
     }
-    return {""};
+    
+    vector<struct lispVar> placeholder;
+    return placeholder;
 }
 
 //lispExpr
-list<string> lispInterpreter::VisitConsExpr(Cons* expr)
+vector<struct lispVar> lispInterpreter::VisitConsExpr(Cons* expr)
 {
     cout << "Entered VisitConsExpr" << endl;
-    list<string> a = eval(expr->a);
-    list<string> b = eval(expr->b);
+    vector<struct lispVar> a = eval(expr->a);
+    vector<struct lispVar> b = eval(expr->b);
     
     return cons(a,b);
     //return {""};
 }
-list<string> lispInterpreter::VisitCdrExpr(Cdr* expr)
+vector<struct lispVar> lispInterpreter::VisitCdrExpr(Cdr* expr)
 {
     cout << "Entered VisitCdrExpr" << endl;
-    list<string> a = eval(expr->a);
+    vector<struct lispVar> a = eval(expr->a);
 
     return cdr(a);
 }
-list<string> lispInterpreter::VisitCarExpr(Car* expr)
+vector<struct lispVar> lispInterpreter::VisitCarExpr(Car* expr)
 {
     cout << "Entered VisitCarExpr" << endl;
-    list<string> a = eval(expr->a);
+    vector<struct lispVar> a = eval(expr->a);
     
     return car(a);
 }
-list<string> lispInterpreter::VisitCallExpr(Call* expr)
+vector<struct lispVar> lispInterpreter::VisitCallExpr(Call* expr)
 {
     cout << "   Enter VisitCallExpr:" << expr->callee.getTokenLexeme()  << endl;
     string functionName = expr->callee.getTokenLexeme();
     lispFunction* function = lispenv->getLispFunction(functionName);
 
-    list<list<string>> functionArguments;
+    list<vector<struct lispVar>> functionArguments;
     for(auto it = expr->arguments.begin(); it != expr->arguments.end(); it++)
         functionArguments.push_back(eval(*it));
 
@@ -264,71 +271,81 @@ list<string> lispInterpreter::VisitCallExpr(Call* expr)
     return function->lispFunctionCall(this,functionArguments);
     //return {""};
 }
-list<string> lispInterpreter::VisitVariableExpr(Variable* expr) 
+vector<struct lispVar> lispInterpreter::VisitVariableExpr(Variable* expr) 
 {
     cout << "Entered VisitVariableExpr: " << expr->name.getTokenLexeme() << endl;
     return lispenv->getVariableValue(expr->name);
 }
-list<string> lispInterpreter::VisitLiteralExpr(Literal* expr) 
+vector<struct lispVar> lispInterpreter::VisitLiteralExpr(Literal* expr) 
 {
     cout << "Entered VisitLiteralExpr: " << endl;
-    return expr->value;
+    
+    return expr->literalValue;
 }
 
 //lispStmt
-list<string> lispInterpreter::VisitPrintStmt(Print* stmt)
+vector<struct lispVar> lispInterpreter::VisitPrintStmt(Print* stmt)
 {
     cout << "   Enter VisitPrintStmt --" << endl;
 
-    list<string> value = eval(stmt->expression);
+    vector<struct lispVar> value = eval(stmt->expression);
 
     cout << "lisp>" ;
     for(auto iterator = value.begin(); iterator != value.end(); iterator++)
-        cout << "(" << (*iterator) << ")";
+        cout << "(" << (*iterator).value << ")";
     cout << endl;
 
-    return {""};
+
+    vector<struct lispVar> placeholder;
+    return placeholder;
 }
-list<string> lispInterpreter::VisitVarStmt(Var* stmt)
+vector<struct lispVar> lispInterpreter::VisitVarStmt(Var* stmt)
 {
     cout << "   Enter VisitVarStmt" << endl;
 
-    list<string> variableValue;
+    vector<struct lispVar> variableValue;
     if(stmt->init) variableValue = eval(stmt->init);
 
     cout << "   completed eval in VisitVarStmt" << endl;
 
     lispenv->define(stmt->name.getTokenLexeme(), variableValue);
-    return {""};
+    
+    
+    vector<struct lispVar> placeholder;
+    return placeholder;
 }
-list<string> lispInterpreter::VisitFunctionStmt(Function* stmt)
+vector<struct lispVar> lispInterpreter::VisitFunctionStmt(Function* stmt)
 {
     cout << "Enter VisitFunctionStmt" << endl;
 
     lispFunction* function = new lispFunction(stmt,lispenv);
     lispenv->defineLispFunction(stmt->name.getTokenLexeme(), function);
 
-    return {""};
+    
+    vector<struct lispVar> placeholder;
+    return placeholder;
 }
-list<string> lispInterpreter::VisitExpressionStmt(Expression* stmt)
+vector<struct lispVar> lispInterpreter::VisitExpressionStmt(Expression* stmt)
 {
-   list<string> functionResult = eval(stmt->expression);
+   vector<struct lispVar> functionResult = eval(stmt->expression);
    return functionResult;
 }
-list<string> lispInterpreter::VisitReturnStmt(Return* stmt)
+vector<struct lispVar> lispInterpreter::VisitReturnStmt(Return* stmt)
 {
     if(stmt) 
         throw new lispFunctionReturn(eval(stmt->value));
 
-    return {""};
+    
+    vector<struct lispVar> placeholder;
+    return placeholder;
 }
 
 //helper
-list<string> lispInterpreter::eval(Expr* expr)
+vector<struct lispVar> lispInterpreter::eval(Expr* expr)
 {
     return expr->Accept(this);
 }
-list<string> lispInterpreter::cons(list<string> a, list<string> b)
+vector<struct lispVar> lispInterpreter::cons(vector<struct lispVar> a, vector<struct lispVar> b)
 {
     for(auto iterator = b.begin(); iterator != b.end(); iterator++)
     {
@@ -336,14 +353,14 @@ list<string> lispInterpreter::cons(list<string> a, list<string> b)
     }
     return a;
 }
-list<string> lispInterpreter::cdr(list<string> a)
+vector<struct lispVar> lispInterpreter::cdr(vector<struct lispVar> a)
 {
-    a.pop_front();
+    a.erase(a.begin());
     return a;
 }
-list<string> lispInterpreter::car(list<string> a)
+vector<struct lispVar> lispInterpreter::car(vector<struct lispVar> a)
 {
-    list<string> aprime; 
+    vector<struct lispVar> aprime; 
     aprime.push_back(a.front());
     return aprime;
 }
