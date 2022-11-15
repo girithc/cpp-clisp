@@ -12,8 +12,7 @@ class Lisp
         void run(std::string lispCode);
 };
 
-void 
-Lisp::runFile(std::string lispFile)
+void Lisp::runFile(std::string lispFile)
 {
     std::ifstream fPtr;
     fPtr.open(lispFile);
@@ -34,9 +33,7 @@ Lisp::runFile(std::string lispFile)
         run(fileCode);
     }
 }
-
-void 
-Lisp::run(std::string lispCode)
+void Lisp::run(std::string lispCode)
 {
     cout << "LispCode in Main: " << endl << lispCode << endl;
     LispScanner* scanner = new LispScanner(lispCode);
@@ -52,12 +49,11 @@ Lisp::run(std::string lispCode)
     list<Stmt*> lispStmts = parser.parse();
     cout << "---- Parser completed ----" << endl << endl;
 
-    //cout << endl << "---- Start Interpreter ----" << endl;
-    //lispInterpreter* interpreter = new lispInterpreter(lispStmts);
-    //interpreter->interpret();
-    //cout << "---- Interpreter completed ----" << endl << endl;
+    cout << endl << "---- Start Interpreter ----" << endl;
+    lispInterpreter* interpreter = new lispInterpreter(lispStmts);
+    interpreter->interpret();
+    cout << "---- Interpreter completed ----" << endl << endl;
 }
-
 
 int main(int argc, char** argv)
 {

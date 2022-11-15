@@ -71,6 +71,7 @@ class lispInterpreter: public Visitor, VisitorStmt
         vector<struct lispVar> cons(vector<struct lispVar> a, vector<struct lispVar> b);
         vector<struct lispVar> cdr(vector<struct lispVar> a);
         vector<struct lispVar> car(vector<struct lispVar> a);
+        void print(vector<struct lispVar> a);
 };
 class lispFunctionReturn
 {
@@ -291,8 +292,11 @@ vector<struct lispVar> lispInterpreter::VisitPrintStmt(Print* stmt)
     vector<struct lispVar> value = eval(stmt->expression);
 
     cout << "lisp>" ;
-    for(auto iterator = value.begin(); iterator != value.end(); iterator++)
-        cout << "(" << (*iterator).value << ")";
+    cout << "[";
+    print(value);
+    cout << "]";
+    //for(auto iterator = value.begin(); iterator != value.end(); iterator++)
+    //    cout << "(" << (*iterator).value << ")";
     cout << endl;
 
 
@@ -347,11 +351,17 @@ vector<struct lispVar> lispInterpreter::eval(Expr* expr)
 }
 vector<struct lispVar> lispInterpreter::cons(vector<struct lispVar> a, vector<struct lispVar> b)
 {
-    for(auto iterator = b.begin(); iterator != b.end(); iterator++)
-    {
-        a.push_back(*iterator);
-    }
-    return a;
+    vector<struct lispVar> lv;
+    
+    struct lispVar x;
+    x.next = a;
+    lv.push_back(x);
+
+    struct lispVar y;
+    y.next = b;
+    lv.push_back(y);
+
+    return lv;
 }
 vector<struct lispVar> lispInterpreter::cdr(vector<struct lispVar> a)
 {
@@ -363,4 +373,17 @@ vector<struct lispVar> lispInterpreter::car(vector<struct lispVar> a)
     vector<struct lispVar> aprime; 
     aprime.push_back(a.front());
     return aprime;
+}
+void lispInterpreter::print(vector<struct lispVar> a)
+{
+    for(auto it = a.begin(); it != a.end(); it++)
+    {
+        if((*it).value.empty())
+        {
+            cout << "(";
+            print((*it).next);
+            cout << ")";
+        } 
+        else cout << (*it).value ;
+    }
 }
