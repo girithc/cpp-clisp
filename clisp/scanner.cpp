@@ -40,13 +40,10 @@ class LispScanner
             {"cdr", CDR},
             {"car", CAR},
             {"set", SET},
-            {"eq", EQ},
             {"number?", ISNUMBER},
             {"symbol?", ISSYMBOL},
-            {"list?", LIST},
+            {"list?", ISLIST},
             {"nil?", ISNIL},
-            {"or?", OR},
-            {"and?", AND},
             {"define", DEFINE}
         };
 
@@ -97,7 +94,9 @@ LispScanner::scanToken()
     cout << "Current char: " << advanceChar << " current:" << current << endl;
     switch (advanceChar) {
         case '(': 
-            addToken(LEFT_PAREN); break;
+            addToken(LEFT_PAREN);
+            if(lookAhead() == ')') addToken(NIL);
+             break;
         case ')': 
             addToken(RIGHT_PAREN); break;
         case '{': 

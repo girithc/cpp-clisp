@@ -53,12 +53,14 @@ class lispInterpreter: public Visitor, VisitorStmt
         lispEnvironment* lispenv;
         list<Stmt*> lispStmts;
 
+        vector<struct lispVar> VisitBinaryExpr(Binary* expr) override;
         vector<struct lispVar> VisitCallExpr(Call* expr) override;
         vector<struct lispVar> VisitVariableExpr(Variable* expr) override;
         vector<struct lispVar> VisitLiteralExpr(Literal* expr) override;
         vector<struct lispVar> VisitConsExpr(Cons* expr) override;
         vector<struct lispVar> VisitCdrExpr(Cdr* expr) override;
         vector<struct lispVar> VisitCarExpr(Car* expr) override;
+        vector<struct lispVar> VisitYesOrNoExpr(YesOrNo* expr) override;
 
         vector<struct lispVar> VisitPrintStmt(Print* stmt) override;
         vector<struct lispVar> VisitVarStmt(Var* stmt) override;
@@ -71,6 +73,24 @@ class lispInterpreter: public Visitor, VisitorStmt
         vector<struct lispVar> cons(vector<struct lispVar> a, vector<struct lispVar> b);
         vector<struct lispVar> cdr(vector<struct lispVar> a);
         vector<struct lispVar> car(vector<struct lispVar> a);
+        vector<struct lispVar> add(vector<struct lispVar> a, vector<struct lispVar> b);
+        vector<struct lispVar> minus(vector<struct lispVar> a, vector<struct lispVar> b);
+        vector<struct lispVar> multiply(vector<struct lispVar> a, vector<struct lispVar> b);
+        vector<struct lispVar> divide(vector<struct lispVar> a, vector<struct lispVar> b);
+        vector<struct lispVar> equal(vector<struct lispVar> a, vector<struct lispVar> b);
+        vector<struct lispVar> not_equal(vector<struct lispVar> a, vector<struct lispVar> b);
+        vector<struct lispVar> greater(vector<struct lispVar> a, vector<struct lispVar> b);
+        vector<struct lispVar> greater_equal(vector<struct lispVar> a, vector<struct lispVar> b);
+        vector<struct lispVar> less(vector<struct lispVar> a, vector<struct lispVar> b);
+        vector<struct lispVar> less_equal(vector<struct lispVar> a, vector<struct lispVar> b);
+        string compare(string a, string b, string binaryoperator);
+        string compareString(string a, string b, string binaryoperator);
+        string compareNumber(string a, string b, string binaryoperator);
+        bool isNumber(string a, string b);
+        bool isNumber(string a);
+        bool isString(string a);
+        bool isNil(string a);
+        bool isList(vector<struct lispVar> a);
         void print(vector<struct lispVar> a);
 };
 class lispFunctionReturn
@@ -235,6 +255,30 @@ vector<struct lispVar> lispInterpreter::executeFunctionBlock(list<Stmt*> lispFun
 }
 
 //lispExpr
+vector<struct lispVar> lispInterpreter::VisitBinaryExpr(Binary* expr)
+{
+    cout << "   Enter VisitBinaryExpr" << endl;
+
+    vector<struct lispVar> a = eval(expr->left);
+    vector<struct lispVar> b = eval(expr->right);
+
+    // result any number in the form of a string
+    if(expr->op.getTokenType() == "PLUS") return add(a,b);
+    else if(expr->op.getTokenType() == "MINUS") return minus(a,b);
+    else if(expr->op.getTokenType() == "STAR") return multiply(a,b);
+    else if(expr->op.getTokenType() == "SLASH") return divide(a,b);
+
+    // result true or false
+    else if(expr->op.getTokenType() == "EQUAL") return equal(a,b);
+    else if(expr->op.getTokenType() == "BANG_EQUAL") return not_equal(a,b);
+    else if(expr->op.getTokenType() == "GREATER") return greater(a,b);
+    else if(expr->op.getTokenType() == "GREATER_EQUAL") return greater_equal(a,b);
+    else if(expr->op.getTokenType() == "LESS") return less(a,b);
+    else if(expr->op.getTokenType() == "LESS_EQUAL") return less_equal(a,b);
+
+    vector<struct lispVar> lv;
+    return lv;
+}
 vector<struct lispVar> lispInterpreter::VisitConsExpr(Cons* expr)
 {
     cout << "Entered VisitConsExpr" << endl;
@@ -282,6 +326,29 @@ vector<struct lispVar> lispInterpreter::VisitLiteralExpr(Literal* expr)
     cout << "Entered VisitLiteralExpr: " << endl;
     
     return expr->literalValue;
+}
+vector<struct lispVar> lispInterpreter::VisitYesOrNoExpr(YesOrNo* expr)
+{
+    cout << "Entered VisitYesOrNoExpr: " << endl;
+    vector<struct lispVar> a = eval(expr->value);
+
+    struct lispVar lv;
+    if(expr->name.getTokenType() == enum_str[ISNUMBER])
+        lv.value = isNumber(a.front().value, a.front().value) ? "true" : "false";
+    
+    else if(expr->name.getTokenType() == enum_str[ISNIL])
+        lv.value = isNil(a.front().value) ? "true" : "false";
+
+    else if(expr->name.getTokenType() == enum_str[ISSYMBOL])
+        lv.value = isNumber(a.front().value, a.front().value) ? "false" : "true";
+
+    else if(expr->name.getTokenType() == enum_str[ISLIST])
+        lv.value = isList(a) ? "true" : "false";
+
+    vector<struct lispVar> returnbool;
+    returnbool.push_back(lv);
+
+    return returnbool;
 }
 
 //lispStmt
@@ -353,13 +420,31 @@ vector<struct lispVar> lispInterpreter::cons(vector<struct lispVar> a, vector<st
 {
     vector<struct lispVar> lv;
     
-    struct lispVar x;
-    x.next = a;
-    lv.push_back(x);
+    if(a.size() == 1 && !a.front().value.empty())
+    {
+        struct lispVar x;
+        x.value = a.front().value;
+        lv.push_back(x);
+    }
+    else
+    {
+        struct lispVar x;
+        x.next = a;
+        lv.push_back(x);
+    }
 
-    struct lispVar y;
-    y.next = b;
-    lv.push_back(y);
+    if(b.size() == 1 && !b.front().value.empty())
+    {
+        struct lispVar x;
+        x.value = b.front().value;
+        lv.push_back(x);
+    }
+    else
+    {
+        struct lispVar x;
+        x.next = b;
+        lv.push_back(x);
+    }
 
     return lv;
 }
@@ -371,19 +456,220 @@ vector<struct lispVar> lispInterpreter::cdr(vector<struct lispVar> a)
 vector<struct lispVar> lispInterpreter::car(vector<struct lispVar> a)
 {
     vector<struct lispVar> aprime; 
-    aprime.push_back(a.front());
+    
+    if(a.front().value.empty()) return a.front().next;
+    else aprime.push_back(a.front());
+
     return aprime;
+}
+vector<struct lispVar> lispInterpreter::add(vector<struct lispVar> a, vector<struct lispVar> b)
+{
+    struct lispVar lv;
+    lv.value = to_string(stod(a.front().value)+stod(b.front().value));
+
+    vector<struct lispVar> lv_;
+    lv_.push_back(lv);
+    return lv_;
+}
+vector<struct lispVar> lispInterpreter::minus(vector<struct lispVar> a, vector<struct lispVar> b)
+{
+    struct lispVar lv;
+    lv.value = to_string(stod(a.front().value)-stod(b.front().value));
+
+    vector<struct lispVar> lv_;
+    lv_.push_back(lv);
+    return lv_;
+}
+vector<struct lispVar> lispInterpreter::multiply(vector<struct lispVar> a, vector<struct lispVar> b)
+{
+    struct lispVar lv;
+    lv.value = to_string(stod(a.front().value)*stod(b.front().value));
+
+    vector<struct lispVar> lv_;
+    lv_.push_back(lv);
+    return lv_;
+}
+vector<struct lispVar> lispInterpreter::divide(vector<struct lispVar> a, vector<struct lispVar> b)
+{
+    struct lispVar lv;
+    lv.value = to_string(stod(a.front().value)/stod(b.front().value));
+
+    vector<struct lispVar> lv_;
+    lv_.push_back(lv);
+    return lv_;
+}
+vector<struct lispVar> lispInterpreter::equal(vector<struct lispVar> a, vector<struct lispVar> b)
+{
+    struct lispVar lv;
+    lv.value = compare(a.front().value, b.front().value, "=");
+
+    vector<struct lispVar> lv_;
+    lv_.push_back(lv);
+    return lv_;
+}
+vector<struct lispVar> lispInterpreter::not_equal(vector<struct lispVar> a, vector<struct lispVar> b)
+{
+    struct lispVar lv;
+    lv.value = compare(a.front().value, b.front().value, "!=");
+
+    vector<struct lispVar> lv_;
+    lv_.push_back(lv);
+    return lv_;
+}
+vector<struct lispVar> lispInterpreter::less(vector<struct lispVar> a, vector<struct lispVar> b)
+{
+    struct lispVar lv;
+    lv.value = compare(a.front().value, b.front().value, "<");
+
+    vector<struct lispVar> lv_;
+    lv_.push_back(lv);
+    return lv_;
+}
+vector<struct lispVar> lispInterpreter::less_equal(vector<struct lispVar> a, vector<struct lispVar> b)
+{
+    struct lispVar lv;
+    lv.value = compare(a.front().value, b.front().value, "<=");
+
+    vector<struct lispVar> lv_;
+    lv_.push_back(lv);
+    return lv_;
+}
+vector<struct lispVar> lispInterpreter::greater(vector<struct lispVar> a, vector<struct lispVar> b)
+{
+    struct lispVar lv;
+    lv.value = compare(a.front().value, b.front().value, ">");
+
+    vector<struct lispVar> lv_;
+    lv_.push_back(lv);
+    return lv_;
+}
+vector<struct lispVar> lispInterpreter::greater_equal(vector<struct lispVar> a, vector<struct lispVar> b)
+{
+    struct lispVar lv;
+    lv.value = compare(a.front().value, b.front().value, ">=");
+
+    vector<struct lispVar> lv_;
+    lv_.push_back(lv);
+    return lv_;
+}
+string lispInterpreter::compare(string a, string b, string binaryoperator)
+{
+    if(isNumber(a,b)) return compareNumber(a, b, binaryoperator);
+    else return compareString(a, b, binaryoperator);
+}
+string lispInterpreter::compareString(string a, string b, string binaryoperator)
+{
+    if (binaryoperator =="<")
+    {   
+        if((a) < (b)) return "true"; 
+        return "false";
+    }
+    else if (binaryoperator == "<=")
+    {   
+        if((a) <= (b)) return "true"; 
+        return "false";
+    }
+    else if (binaryoperator == ">")
+    {   
+        if((a) > (b)) return "true"; 
+        return "false";
+    }
+    else if (binaryoperator == ">=")
+    {   
+        if((a) >= (b)) return "true"; 
+        return "false";
+    }
+    else if (binaryoperator == "!=")
+    {   
+        if((a) != (b))  return "true"; 
+        return "false";
+    }
+    else if (binaryoperator == "=")
+    {   
+        if((a) == (b)) return "true"; 
+        return "false";
+    }
+    
+    return "false";
+}
+string lispInterpreter::compareNumber(string a, string b, string binaryoperator)
+{
+    if (binaryoperator =="<")
+    {   
+        if(stod(a) < stod(b)) return "true"; 
+        return "false";
+    }
+    else if (binaryoperator == "<=")
+    {   
+        if(stod(a) <= stod(b)) return "true"; 
+        return "false";
+    }
+    else if (binaryoperator == ">")
+    {   
+        if(stod(a) > stod(b)) return "true"; 
+        return "false";
+    }
+    else if (binaryoperator == ">=")
+    {   
+        if(stod(a) >= stod(b)) return "true"; 
+        return "false";
+    }
+    else if (binaryoperator == "!=")
+    {   
+        if(stod(a) != stod(b))  return "true"; 
+        return "false";
+    }
+    else if (binaryoperator == "=")
+    {   
+        if(stod(a) == stod(b)) return "true"; 
+        return "false";
+    }
+    
+    return "false";
+}
+bool lispInterpreter::isNumber(string a, string b)
+{
+    for (int x = 0; x < a.length(); x++)
+    {
+        if (isdigit(a[x])) continue;
+        else if(a[x] =='.' && isdigit(a[x+1])) continue;
+        else return false;
+    }
+    for (int y = 0; y < b.length(); y++)
+    {
+        if (isdigit(b[y])) continue;
+        else if(b[y] =='.' && isdigit(b[y+1])) continue;
+        else return false;
+    }
+
+    return true;
+}
+bool lispInterpreter::isNil(string a)
+{
+    if(a == "") return true;
+
+    return false;
+}
+bool lispInterpreter::isList(vector<struct lispVar> a)
+{
+    if(a.size() > 1) return true;
+    return false;
 }
 void lispInterpreter::print(vector<struct lispVar> a)
 {
+    int counter = 0;
     for(auto it = a.begin(); it != a.end(); it++)
     {
+        //cout << "(tc:" << counter+1 << ")" << endl;
         if((*it).value.empty())
         {
             cout << "(";
             print((*it).next);
             cout << ")";
         } 
-        else cout << (*it).value ;
+        else cout << " (" << (*it).value << ") ";
+
+
+        counter++;
     }
 }

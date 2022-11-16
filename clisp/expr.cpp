@@ -34,6 +34,7 @@ class Variable;
 class Cons;
 class Car;
 class Cdr;
+class YesOrNo;
 
 class Visitor : public Expr
 {
@@ -53,6 +54,7 @@ class Visitor : public Expr
         virtual vector<struct lispVar> VisitConsExpr(Cons *expr){vector<struct lispVar> lv; return lv;};
         virtual vector<struct lispVar> VisitCarExpr(Car *expr){vector<struct lispVar> lv; return lv;};
         virtual vector<struct lispVar> VisitCdrExpr(Cdr *expr){vector<struct lispVar> lv; return lv;};
+        virtual vector<struct lispVar> VisitYesOrNoExpr(YesOrNo *expr){vector<struct lispVar> lv; return lv;};
 };
 
 
@@ -246,6 +248,21 @@ class Set : public Expr
         vector<struct lispVar> Accept(Visitor *visitor)
         {   return visitor->VisitSetExpr(this);}
 
+};
+
+class YesOrNo : public Expr
+{
+    public:
+        Expr* value;
+        Token name;
+
+    YesOrNo(Token n, Expr* v)
+    {
+        name = n;
+        value = v;
+    }
+    vector<struct lispVar> Accept(Visitor *visitor)
+    {   return visitor->VisitYesOrNoExpr(this);}
 };
 
 

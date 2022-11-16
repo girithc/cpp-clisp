@@ -21,7 +21,7 @@ enum TokenType
         AND, FALSE, FUNNAME, FOR, IF, ELSE, NIL, OR, DEFINE,
         PRINT, RETURN, THIS, TRUE, VAR, LIST,
         COND, CONS, CAR, CDR, SET, EQ, 
-        ISNUMBER, ISSYMBOL, ISNIL,
+        ISNUMBER, ISSYMBOL, ISNIL, ISLIST,
 
         //others
         TokenEOF,
@@ -40,7 +40,7 @@ const string enum_str[] =
         "AND", "FALSE", "FUNNAME", "FOR", "IF","ELSE", "NIL", "OR", "DEFINE",
         "PRINT", "RETURN", "THIS", "TRUE", "VAR", "LIST",  
         "COND", "CONS", "CAR", "CDR", "SET", "EQ",
-        "ISNUMBER", "ISSYMBOL", "ISNIL",
+        "ISNUMBER", "ISSYMBOL", "ISNIL", "ISLIST",
         "TokenEOF",
 };
 

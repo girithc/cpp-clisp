@@ -20,7 +20,7 @@ class Block;
 class Class;
 class Expression;
 class Function;
-class If;
+class Cond;
 class Print;
 class Return;
 class Var;
@@ -34,7 +34,7 @@ class VisitorStmt : public Stmt
         virtual vector<struct lispVar> VisitClassStmt(Class* stmt){vector<struct lispVar> lv; return lv;};
         virtual vector<struct lispVar> VisitExpressionStmt(Expression* stmt){vector<struct lispVar> lv; return lv;};
         virtual vector<struct lispVar> VisitFunctionStmt(Function* stmt){vector<struct lispVar> lv; return lv;};
-        virtual vector<struct lispVar> VisitIfStmt(If* stmt){vector<struct lispVar> lv; return lv;};
+        virtual vector<struct lispVar> VisitCondStmt(Cond* stmt){vector<struct lispVar> lv; return lv;};
         virtual vector<struct lispVar> VisitPrintStmt(Print* stmt){vector<struct lispVar> lv; return lv;};
         virtual vector<struct lispVar> VisitReturnStmt(Return* stmt){vector<struct lispVar> lv; return lv;};
         virtual vector<struct lispVar> VisitVarStmt(Var* stmt){vector<struct lispVar> lv; return lv;};
@@ -113,24 +113,22 @@ class Function : public Stmt
         }
 };
 
-class If : public Stmt
+class Cond : public Stmt
 {
     public:
-        Expr* condition;
-        Stmt* ifBranch;
-        Stmt* elseBranch;
+        vector<Stmt*> conditionbranches;
+        vector<Expr*> conditions;
 
-    If(Expr* c, Stmt* tb, Stmt* eb)
-    {
-        condition = c;
-        ifBranch = tb;
-        elseBranch = eb;
-    }
+        Cond(vector<Stmt*>  cb, vector<Expr*> c)
+        {
+            conditionbranches = cb;
+            conditions = c;
+        }
 
-    vector<struct lispVar> Accept(VisitorStmt* visitor)
-    {
-        return visitor->VisitIfStmt(this);
-    }
+        vector<struct lispVar> Accept(VisitorStmt* visitor)
+        {
+            return visitor->VisitCondStmt(this);
+        }
 };
 
 class Print : public Stmt

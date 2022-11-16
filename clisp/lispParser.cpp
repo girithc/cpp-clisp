@@ -25,6 +25,7 @@ class lispParser
     Stmt* detail();
     Stmt* functionDetail();
     Stmt* setDeclaration();
+    Stmt* condDeclaration();
     Stmt* printDeclaration();
     Stmt* functionDeclaration();
     Stmt* functionInstanceDeclaration();
@@ -85,9 +86,10 @@ Stmt* lispParser::detail()
 {
     cout << "Entered detail" << endl;
 
-    list<TokenType> set, print, define, functionCall;
+    list<TokenType> set, cond, print, define, functionCall;
 
     set.push_back(SET);
+    cond.push_back(COND);
     print.push_back(PRINT);
     define.push_back(DEFINE);
     functionCall.push_back(IDENTIFIER);
@@ -96,6 +98,11 @@ Stmt* lispParser::detail()
     {
         cout << "Entered SET" << endl;
         return setDeclaration();
+    }
+    if(match(cond))
+    {
+        cout << "Entered COND" << endl;
+        return condDeclaration();
     }
     else if(match(print))
     {
@@ -121,12 +128,16 @@ Stmt* lispParser::detail()
 Stmt* lispParser::functionDetail()
 {
     cout << "Entered function detail" << endl;
-    list<TokenType> print, cadr, cons;
+    list<TokenType> print, cadr, cons, yesorno;
     print.push_back(PRINT);
     cadr.push_back(CAR);
     cadr.push_back(CDR);
     cons.push_back(CONS);
-    
+    yesorno.push_back(ISNUMBER);
+    yesorno.push_back(ISSYMBOL);
+    yesorno.push_back(ISLIST);
+    yesorno.push_back(ISNIL);
+
     if(match(print))
     {
         cout << "Entered PRINT" << endl;
@@ -160,9 +171,31 @@ Stmt* lispParser::functionDetail()
         return new Return(new Cons(cons, a, b));
 
     }
+    else if(match(yesorno))
+    {
+        cout << "Entered YES/NO" << endl;
+        
+        Token yesno = getLispToken(current-1);
+        Expr* value = lispExpression();
 
-
-
+        if(yesno.getTokenType() == enum_str[ISNUMBER])
+        {
+            cout << "   created ISNUMBER" << endl;
+        }
+        else if(yesno.getTokenType() == enum_str[ISSYMBOL])
+        {
+            cout << "   created ISSYMBOL" << endl;
+        }
+        else if(yesno.getTokenType() == enum_str[ISLIST])
+        {
+            cout << "   created ISLIST" << endl;
+        }
+        else if(yesno.getTokenType() == enum_str[ISNIL])
+        {
+            cout << "   created ISNIL" << endl;
+        }
+        return new Return(new YesOrNo(yesno, value));
+    }
     return returnDeclaration();
 }
 Stmt* lispParser::setDeclaration()
@@ -176,6 +209,22 @@ Stmt* lispParser::setDeclaration()
     
     cout << "   created VAR" << endl;
     return new Var(id, idValue);
+}
+Stmt* lispParser::condDeclaration()
+{
+    while(!check(RIGHT_PAREN))
+    {   //if else condition
+        Token leftparen = consumeLispToken(LEFT_PAREN, "Expect '(' at the start of condition.");
+        //cond condition
+        Expr* lispcondition = lispExpression();
+        Token rightparen = consumeLispToken(RIGHT_PAREN, "Expect ')' at the start of condition.");
+    
+        Token leftparen2 = consumeLispToken(LEFT_PAREN, "Expect '(' at the start of result.");
+        //cond result
+        Token rightparen2 = consumeLispToken(RIGHT_PAREN, "Expect ')' at the start of result.");
+    }
+    Stmt* placeholder;
+    return placeholder;
 }
 Stmt* lispParser::printDeclaration()
 {
@@ -242,7 +291,7 @@ list<Stmt*> lispParser::functionBlock()
 
 Expr* lispParser::lispExpression()
 {
-    list<TokenType> arithmetic, cons, cadr;// symnum;
+    list<TokenType> arithmetic, cons, cadr, yesorno;// symnum;
     arithmetic.push_back(PLUS);
     arithmetic.push_back(MINUS);
     arithmetic.push_back(STAR);
@@ -250,9 +299,15 @@ Expr* lispParser::lispExpression()
     arithmetic.push_back(EQUAL);
     arithmetic.push_back(LESS);
     arithmetic.push_back(GREATER);
+    arithmetic.push_back(GREATER_EQUAL);
+    arithmetic.push_back(LESS_EQUAL);
     cons.push_back(CONS);
     cadr.push_back(CAR);
     cadr.push_back(CDR);
+    yesorno.push_back(ISNUMBER);
+    yesorno.push_back(ISSYMBOL);
+    yesorno.push_back(ISLIST);
+    yesorno.push_back(ISNIL);
     //symnum.push_back(NUMBER);
     //symnum.push_back(SYMBOL);
     //symnum.push_back(LIST);
@@ -303,6 +358,31 @@ Expr* lispParser::lispExpression()
         }
         
     }
+    else if(match(yesorno))
+    {
+        cout << "Entered YES/NO" << endl;
+        
+        Token yesno = getLispToken(current-1);
+        Expr* value = lispExpression();
+
+        if(yesno.getTokenType() == enum_str[ISNUMBER])
+        {
+            cout << "   created ISNUMBER" << endl;
+        }
+        else if(yesno.getTokenType() == enum_str[ISSYMBOL])
+        {
+            cout << "   created ISSYMBOL" << endl;
+        }
+        else if(yesno.getTokenType() == enum_str[ISLIST])
+        {
+            cout << "   created ISLIST" << endl;
+        }
+        else if(yesno.getTokenType() == enum_str[ISNIL])
+        {
+            cout << "   created ISNIL" << endl;
+        }
+        return new YesOrNo(yesno, value);
+    }
     /*
     else if(match(symnum))
     {
@@ -320,11 +400,12 @@ Expr* lispParser::lispPrimary()
 {
     cout << "   Entered lispPrimary:" << getLispToken(current).getTokenType()  << endl;
 
-    list<TokenType>symnum, id, lispExpr;
+    list<TokenType>symnum, id, lispExpr, nil;
     symnum.push_back(SYMBOL);
     symnum.push_back(NUMBER);
     id.push_back(IDENTIFIER);
     lispExpr.push_back(LEFT_PAREN);
+    nil.push_back(NIL);
     
     if(match(symnum))
     {
@@ -370,6 +451,10 @@ Expr* lispParser::lispPrimary()
 
         Token right_paren = consumeLispToken(RIGHT_PAREN, "Expect a ')' at the end of a lisp expression.");
         return lispExpr;
+    }
+    else if(match(nil))
+    {
+        return new Literal("");
     }
     
     Expr* exprplaceholder;
