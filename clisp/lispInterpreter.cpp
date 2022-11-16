@@ -67,6 +67,7 @@ class lispInterpreter: public Visitor, VisitorStmt
         vector<struct lispVar> VisitFunctionStmt(Function* stmt) override;
         vector<struct lispVar> VisitExpressionStmt(Expression* stmt) override;
         vector<struct lispVar> VisitReturnStmt(Return* stmt) override;
+        vector<struct lispVar> VisitCondStmt(Cond* stmt) override;
 
         //helper
         vector<struct lispVar> eval(Expr* expr);
@@ -307,10 +308,16 @@ vector<struct lispVar> lispInterpreter::VisitCallExpr(Call* expr)
     cout << "   Enter VisitCallExpr:" << expr->callee.getTokenLexeme()  << endl;
     string functionName = expr->callee.getTokenLexeme();
     lispFunction* function = lispenv->getLispFunction(functionName);
+    cout << "       function name:" << function->init->name.getTokenLexeme() << endl; 
+    cout << "       args size:" << expr->arguments.size() << endl;
 
     list<vector<struct lispVar>> functionArguments;
     for(auto it = expr->arguments.begin(); it != expr->arguments.end(); it++)
+    {
+        cout << "       function arguments" << endl;
         functionArguments.push_back(eval(*it));
+    }
+        
 
     cout << "   Completed VisitCallExpr function arguments" << endl;
     return function->lispFunctionCall(this,functionArguments);
@@ -392,23 +399,39 @@ vector<struct lispVar> lispInterpreter::VisitFunctionStmt(Function* stmt)
     lispFunction* function = new lispFunction(stmt,lispenv);
     lispenv->defineLispFunction(stmt->name.getTokenLexeme(), function);
 
-    
     vector<struct lispVar> placeholder;
     return placeholder;
 }
 vector<struct lispVar> lispInterpreter::VisitExpressionStmt(Expression* stmt)
 {
-   vector<struct lispVar> functionResult = eval(stmt->expression);
-   return functionResult;
+    cout << "   Enter VisitExpressionStmt" << endl;
+    vector<struct lispVar> functionResult = eval(stmt->expression);
+    return functionResult;
 }
 vector<struct lispVar> lispInterpreter::VisitReturnStmt(Return* stmt)
 {
-    if(stmt) 
+    cout << "   Enter VisitReturnStmt" << endl;
+    if(stmt)
+    {   
+        cout << "       in return" << endl;
         throw new lispFunctionReturn(eval(stmt->value));
+    } 
 
-    
     vector<struct lispVar> placeholder;
     return placeholder;
+}
+vector<struct lispVar> lispInterpreter::VisitCondStmt(Cond* stmt)
+{
+    cout << "   Enter VisitCondStmt" << endl;
+    auto it_branch = stmt->conditionbranches.begin();
+    for(auto it = stmt->conditions.begin(); it != stmt->conditions.end(); it++)
+    {
+        if(eval(*it).front().value == "true")  return (*it_branch)->Accept(this);
+        else it_branch++;
+
+    }
+    vector<struct lispVar> lv_;
+    return lv_;
 }
 
 //helper

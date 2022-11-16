@@ -116,13 +116,14 @@ class Function : public Stmt
 class Cond : public Stmt
 {
     public:
-        vector<Stmt*> conditionbranches;
-        vector<Expr*> conditions;
+        list<Expr*> conditions;
+        list<Stmt*> conditionbranches;
+        
 
-        Cond(vector<Stmt*>  cb, vector<Expr*> c)
+        Cond(list<Expr*> c, list<Stmt*>  cb)
         {
-            conditionbranches = cb;
             conditions = c;
+            conditionbranches = cb;
         }
 
         vector<struct lispVar> Accept(VisitorStmt* visitor)

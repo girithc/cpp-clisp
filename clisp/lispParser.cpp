@@ -26,6 +26,7 @@ class lispParser
     Stmt* functionDetail();
     Stmt* setDeclaration();
     Stmt* condDeclaration();
+    Stmt* condFunDeclaration();
     Stmt* printDeclaration();
     Stmt* functionDeclaration();
     Stmt* functionInstanceDeclaration();
@@ -78,7 +79,7 @@ Stmt* lispParser::declaration()
     Token right_paren = consumeLispToken(RIGHT_PAREN, "Expect ')' at the end of a statment.");
     //cout << "   After consumeLispToken. Current: " << current << endl;
 
-    Stmt* stmtplaceholder;
+    //Stmt* stmtplaceholder;
     //return stmtplaceholder;
     return stmtDetail;
 }
@@ -118,7 +119,7 @@ Stmt* lispParser::detail()
     {
         cout << "Entered FunctionCall" << endl;
         return functionInstanceDeclaration();
-        exit(1);
+        //exit(1);
     }
 
 
@@ -128,7 +129,7 @@ Stmt* lispParser::detail()
 Stmt* lispParser::functionDetail()
 {
     cout << "Entered function detail" << endl;
-    list<TokenType> print, cadr, cons, yesorno;
+    list<TokenType> print, cadr, cons, yesorno, cond, functionCall;
     print.push_back(PRINT);
     cadr.push_back(CAR);
     cadr.push_back(CDR);
@@ -137,6 +138,8 @@ Stmt* lispParser::functionDetail()
     yesorno.push_back(ISSYMBOL);
     yesorno.push_back(ISLIST);
     yesorno.push_back(ISNIL);
+    cond.push_back(COND);
+    functionCall.push_back(IDENTIFIER);
 
     if(match(print))
     {
@@ -194,7 +197,20 @@ Stmt* lispParser::functionDetail()
         {
             cout << "   created ISNIL" << endl;
         }
+        cout << "   created Return" << endl;
         return new Return(new YesOrNo(yesno, value));
+    }
+    else if(match(cond))
+    {
+        cout << "Entered COND" << endl;
+        return condFunDeclaration();
+        
+    }
+    else if(match(functionCall))
+    {
+        cout << "Entered FunctionCall" << endl;
+        return functionInstanceDeclaration();
+        //exit(1);
     }
     return returnDeclaration();
 }
@@ -212,19 +228,50 @@ Stmt* lispParser::setDeclaration()
 }
 Stmt* lispParser::condDeclaration()
 {
+    list<Expr*> conditions;
+    list<Stmt*> conditionbranches;
     while(!check(RIGHT_PAREN))
     {   //if else condition
-        Token leftparen = consumeLispToken(LEFT_PAREN, "Expect '(' at the start of condition.");
-        //cond condition
+        cout << "       cond CONDITION" << endl;
+        Token leftparen_condition = consumeLispToken(LEFT_PAREN, "Expect '(' at the start of condition.");
         Expr* lispcondition = lispExpression();
-        Token rightparen = consumeLispToken(RIGHT_PAREN, "Expect ')' at the start of condition.");
-    
+        Token rightparen_condition = consumeLispToken(RIGHT_PAREN, "Expect ')' at the start of condition.");
+
+        cout << "       cond BRANCH" << endl;
         Token leftparen2 = consumeLispToken(LEFT_PAREN, "Expect '(' at the start of result.");
-        //cond result
+        Stmt* branch = detail();
         Token rightparen2 = consumeLispToken(RIGHT_PAREN, "Expect ')' at the start of result.");
+    
+        conditions.push_back(lispcondition);
+        conditionbranches.push_back(branch);
     }
-    Stmt* placeholder;
-    return placeholder;
+    
+    cout << "   created COND" << endl;
+    return new Cond(conditions,conditionbranches);
+}
+Stmt* lispParser::condFunDeclaration()
+{
+    cout << "   Enter CondFunDeclaration " << endl;
+    list<Expr*> conditions;
+    list<Stmt*> conditionbranches;
+    while(!check(RIGHT_PAREN))
+    {   //if else condition
+        cout << "       cond CONDITION" << endl;
+        Token leftparen_condition = consumeLispToken(LEFT_PAREN, "Expect '(' at the start of condition.");
+        Expr* lispcondition = lispExpression();
+        Token rightparen_condition = consumeLispToken(RIGHT_PAREN, "Expect ')' at the start of condition.");
+
+        cout << "       cond BRANCH" << endl;
+        Token leftparen2 = consumeLispToken(LEFT_PAREN, "Expect '(' at the start of result.");
+        Stmt* branch = functionDetail();
+        Token rightparen2 = consumeLispToken(RIGHT_PAREN, "Expect ')' at the start of result.");
+    
+        conditions.push_back(lispcondition);
+        conditionbranches.push_back(branch);
+    }
+    
+    cout << "   created COND" << endl;
+    return new Cond(conditions,conditionbranches);
 }
 Stmt* lispParser::printDeclaration()
 {
@@ -269,8 +316,10 @@ Stmt* lispParser::functionInstanceDeclaration()
 }
 Stmt* lispParser::returnDeclaration()
 {
+    cout << "   Return declaration" << endl;
     Expr* returnValue = lispExpression();
 
+    cout << "   created Return" << endl;
     return new Return(returnValue);
 }
 list<Stmt*> lispParser::functionBlock()
