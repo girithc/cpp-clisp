@@ -91,7 +91,7 @@ void
 LispScanner::scanToken()
 {
     char advanceChar = advance();
-    cout << "Current char: " << advanceChar << " current:" << current << endl;
+    //cout << "Current char: " << advanceChar << " current:" << current << endl;
     switch (advanceChar) {
         case '(': 
             addToken(LEFT_PAREN);
@@ -205,7 +205,7 @@ LispScanner::addToken(TokenType t)
 void 
 LispScanner::addToken(TokenType tokentype, string tokenLiteral)
 {
-    cout << "   AddToken(" << enum_str[tokentype] << "," << tokenLiteral << "," << lispCode.substr(start,lenLispCode()) << ","  << line << ")" << endl;
+    //cout << "   AddToken(" << enum_str[tokentype] << "," << tokenLiteral << "," << lispCode.substr(start,lenLispCode()) << ","  << line << ")" << endl;
     
     if(enum_str[tokentype] == "SYMBOL")
         lispTokens.push_back(*(new Token(tokentype,tokenLiteral,lispCode.substr(start,lenLispCode()),line)));
@@ -251,7 +251,7 @@ LispScanner::addTokenSymbol()
 {
     while(isNotEnd() && lookAhead()!='"')
     {
-        cout << "   consuming string" << endl;
+        //cout << "   consuming string" << endl;
         if(lookAhead()!='\n') advance();
         line ++;
     }

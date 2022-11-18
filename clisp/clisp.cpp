@@ -35,24 +35,24 @@ void Lisp::runFile(std::string lispFile)
 }
 void Lisp::run(std::string lispCode)
 {
-    cout << "LispCode in Main: " << endl << lispCode << endl;
+    //cout << "LispCode in Main: " << endl << lispCode << endl;
     LispScanner* scanner = new LispScanner(lispCode);
     list<Token> lispTokens = scanner->scanTokens();
 
-    for(auto itr = lispTokens.begin(); itr != lispTokens.end(); itr++)
-    {
-        cout << itr->getTokenType() << endl;
-    }
+    //for(auto itr = lispTokens.begin(); itr != lispTokens.end(); itr++)
+    //{
+        //cout << itr->getTokenType() << endl;
+    //}
 
-    cout << endl << "---- Start Parser ----" << endl;
+    //cout << endl << "---- Start Parser ----" << endl;
     lispParser parser(lispTokens);
     list<Stmt*> lispStmts = parser.parse();
-    cout << "---- Parser completed ----" << endl << endl;
+    //cout << "---- Parser completed ----" << endl << endl;
 
-    cout << endl << "---- Start Interpreter ----" << endl;
+    //cout << endl << "---- Start Interpreter ----" << endl;
     lispInterpreter* interpreter = new lispInterpreter(lispStmts);
     interpreter->interpret();
-    cout << "---- Interpreter completed ----" << endl << endl;
+    //cout << "---- Interpreter completed ----" << endl << endl;
 }
 
 int main(int argc, char** argv)

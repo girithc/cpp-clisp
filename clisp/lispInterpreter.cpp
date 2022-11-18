@@ -91,10 +91,11 @@ class lispInterpreter: public Visitor, VisitorStmt
         string compare(string a, string b, string binaryoperator);
         string compareString(string a, string b, string binaryoperator);
         string compareNumber(string a, string b, string binaryoperator);
+        bool isNumber(vector<struct lispVar> b);
         bool isNumber(string a, string b);
-        bool isNumber(string a);
-        bool isNil(string a);
-        bool isList(vector<struct lispVar> a);
+        bool isSymbol(vector<struct lispVar> b);
+        bool isNil(vector<struct lispVar> b);
+        bool isList(vector<struct lispVar> b);
         void print(vector<struct lispVar> a);
 };
 class lispFunctionReturn
@@ -115,8 +116,8 @@ lispEnvironment::lispEnvironment(lispEnvironment *e)
 }
 void lispEnvironment::define(string variable, vector<struct lispVar> variableValue)
 {
-    cout << "   Enter define:" << variable << " = " << variableValue.front().value << endl;
-    print();
+    //cout << "   Enter define:" << variable << " = " << variableValue.front().value << endl;
+    //print();
     if(lispMap.find(variable) != lispMap.end()) lispMap[variable] = variableValue;
     
     else lispMap.insert({{variable, variableValue}});
@@ -127,7 +128,7 @@ void lispEnvironment::define(string variable, vector<struct lispVar> variableVal
 void lispEnvironment::defineLispFunction(string function, lispFunction* functionValue)
 {
     //define lispVariable
-    cout << "   Enter defineLoxFunction:" << function << endl;
+    //cout << "   Enter defineLoxFunction:" << function << endl;
     vector<struct lispVar> functionVariableValue;
     struct lispVar lv;
     lv.value = "<lispFunction>";
@@ -155,19 +156,19 @@ void lispEnvironment::resolve()
 vector<struct lispVar> lispEnvironment::getVariableValue(Token variable)
 {
     //print();
-    cout << "   Entered getVariableValue: " << variable.getTokenLexeme() << endl;
-    print();
+    //cout << "   Entered getVariableValue: " << variable.getTokenLexeme() << endl;
+    //print();
     if(lispMap.find(variable.getTokenLexeme()) == lispMap.end())
     {
         if(enclosing)
         {
-            cout << "   entering enclosing" << endl;
+            //cout << "   entering enclosing" << endl;
             return enclosing->getVariableValue(variable);
         }
     }
     else
     {
-        cout << "found value of variable" << endl;
+        //cout << "found value of variable" << endl;
         return lispMap[variable.getTokenLexeme()];
         //exit(1);
     }
@@ -181,16 +182,16 @@ vector<struct lispVar> lispEnvironment::getVariableValue(Token variable)
 }
 lispFunction* lispEnvironment::getLispFunction(string functionName)
 {
-    cout << "   Entered getLispFunction" << endl;
-    print();
+    //cout << "   Entered getLispFunction" << endl;
+    //print();
     if(lispFunctionMap.find(functionName) == lispFunctionMap.end())
     {
-        cout << "   entering enclosing" << endl;
+        //cout << "   entering enclosing" << endl;
         return enclosing->getLispFunction(functionName);
     }
     else
     {
-        cout << "found value of Function" << endl;
+        //cout << "found value of Function" << endl;
         return lispFunctionMap[functionName];
     }
 
@@ -202,16 +203,16 @@ lispFunction* lispEnvironment::getLispFunction(string functionName)
 }
 void lispEnvironment::print()
 {
-    cout << endl;
+    //cout << endl;
     for(auto it = lispMap.begin(); it != lispMap.end(); it++)
         cout << it->first << ", " << it->second.front().value << endl;
-    cout << endl;
+    //cout << endl;
 }
 
 //lispFunction
 lispFunction::lispFunction(Function* init, lispEnvironment* lispFunctionEnvironment)
 {
-    cout << "   Declare lispFunction()" << endl;
+    //cout << "   Declare lispFunction()" << endl;
     this->init = init;
     this->lispFunctionEnvironment = lispFunctionEnvironment;
     //this->lispFunctionEnvironment->print();
@@ -219,7 +220,7 @@ lispFunction::lispFunction(Function* init, lispEnvironment* lispFunctionEnvironm
 vector<struct lispVar> lispFunction::lispFunctionCall(lispInterpreter* lispFunctionInterpreter, list<vector<struct lispVar>> lispFunctionArguments)
 {
     //new lispFunction environment
-    cout << "   Enter lispFunctionCall" << endl;
+    //cout << "   Enter lispFunctionCall" << endl;
     lispEnvironment* lispenv = new lispEnvironment(lispFunctionInterpreter->globals);
     list<Token>::iterator parametersIterator = init->params.begin();
     list<vector<struct lispVar>>::iterator parametersValueIterator = lispFunctionArguments.begin();
@@ -232,14 +233,14 @@ vector<struct lispVar> lispFunction::lispFunctionCall(lispInterpreter* lispFunct
     }
     try
     {
-        cout << "       in lispFunctionCall" << endl;
+        //cout << "       in lispFunctionCall" << endl;
         //lispenv->print();
-        cout << "       ---" << endl;
+        //cout << "       ---" << endl;
         lispFunctionInterpreter->executeFunctionBlock(init->body, lispenv);
     }
     catch(lispFunctionReturn* lispFunctionReturnValue)
     {
-        cout << "lispFunction Return value found." << endl;
+        //cout << "lispFunction Return value found." << endl;
         return lispFunctionReturnValue->lispFunctionReturnValue;
     }
     
@@ -256,14 +257,14 @@ lispInterpreter::lispInterpreter(list<Stmt*> lispStmts)
 void lispInterpreter::interpret()
 {
     try {
-        cout << endl << "Enter interpret" << endl << endl;
+        //cout << endl << "Enter interpret" << endl << endl;
         list<Stmt*>::iterator lispStmtsIterator;
         int lispStmtCounter = 0;
 
         for(lispStmtsIterator = lispStmts.begin(); lispStmtsIterator != lispStmts.end(); lispStmtsIterator++)
         {   
             lispStmtCounter++;
-            cout << "   interpret LispStmt:" << lispStmtCounter << endl;
+            //cout << "   interpret LispStmt:" << lispStmtCounter << endl;
             interpretLispStmt(*lispStmtsIterator);
         }
 
@@ -273,13 +274,13 @@ void lispInterpreter::interpret()
 }
 void lispInterpreter::interpretLispStmt(Stmt* lispStmt)
 {
-    cout << "   Enter interpretLispStmt" << endl;
+    //cout << "   Enter interpretLispStmt" << endl;
     vector<struct lispVar> returnplaceholder = lispStmt->Accept(this);
 }
 vector<struct lispVar> lispInterpreter::executeFunctionBlock(list<Stmt*> lispFunctionStmts, lispEnvironment* lispenv)
 {
     vector<struct lispVar> result;
-    cout << "       Enter executeFunctionBlock: " << lispFunctionStmts.size() << endl;
+    //cout << "       Enter executeFunctionBlock: " << lispFunctionStmts.size() << endl;
     //lispenv->print();
     this->lispenv = lispenv;
     for(auto it = lispFunctionStmts.begin(); it != lispFunctionStmts.end(); it++)
@@ -294,7 +295,7 @@ vector<struct lispVar> lispInterpreter::executeFunctionBlock(list<Stmt*> lispFun
 //lispExpr
 vector<struct lispVar> lispInterpreter::VisitBinaryExpr(Binary* expr)
 {
-    cout << "   Enter VisitBinaryExpr" << endl;
+    //cout << "   Enter VisitBinaryExpr" << endl;
 
     vector<struct lispVar> a = eval(expr->left);
     vector<struct lispVar> b = eval(expr->right);
@@ -318,7 +319,7 @@ vector<struct lispVar> lispInterpreter::VisitBinaryExpr(Binary* expr)
 }
 vector<struct lispVar> lispInterpreter::VisitConsExpr(Cons* expr)
 {
-    cout << "Entered VisitConsExpr" << endl;
+    //cout << "Entered VisitConsExpr" << endl;
     vector<struct lispVar> a = eval(expr->a);
     vector<struct lispVar> b = eval(expr->b);
     
@@ -327,35 +328,35 @@ vector<struct lispVar> lispInterpreter::VisitConsExpr(Cons* expr)
 }
 vector<struct lispVar> lispInterpreter::VisitCdrExpr(Cdr* expr)
 {
-    cout << "Entered VisitCdrExpr" << endl;
+    //cout << "Entered VisitCdrExpr" << endl;
     vector<struct lispVar> a = eval(expr->a);
 
     return cdr(a);
 }
 vector<struct lispVar> lispInterpreter::VisitCarExpr(Car* expr)
 {
-    cout << "Entered VisitCarExpr" << endl;
+    //cout << "Entered VisitCarExpr" << endl;
     vector<struct lispVar> a = eval(expr->a);
     
     return car(a);
 }
 vector<struct lispVar> lispInterpreter::VisitCallExpr(Call* expr)
 {
-    cout << "   Enter VisitCallExpr:" << expr->callee.getTokenLexeme()  << endl;
+    //cout << "   Enter VisitCallExpr:" << expr->callee.getTokenLexeme()  << endl;
     string functionName = expr->callee.getTokenLexeme();
     lispFunction* function = lispenv->getLispFunction(functionName);
-    cout << "       function name:" << function->init->name.getTokenLexeme() << endl; 
-    cout << "       args size:" << expr->arguments.size() << endl;
+    //cout << "       function name:" << function->init->name.getTokenLexeme() << endl; 
+    //cout << "       args size:" << expr->arguments.size() << endl;
 
     list<vector<struct lispVar>> functionArguments;
     for(auto it = expr->arguments.begin(); it != expr->arguments.end(); it++)
     {
-        cout << "       function arguments" << endl;
+        //cout << "       function arguments" << endl;
         functionArguments.push_back(eval(*it));
     }
         
 
-    cout << "   Completed VisitCallExpr function arguments" << endl;
+    //cout << "   Completed VisitCallExpr function arguments" << endl;
     
     vector<struct lispVar> a = function->lispFunctionCall(this,functionArguments);
 
@@ -364,32 +365,32 @@ vector<struct lispVar> lispInterpreter::VisitCallExpr(Call* expr)
 }
 vector<struct lispVar> lispInterpreter::VisitVariableExpr(Variable* expr) 
 {
-    cout << "Entered VisitVariableExpr: " << expr->name.getTokenLexeme() << endl;
+    //cout << "Entered VisitVariableExpr: " << expr->name.getTokenLexeme() << endl;
     return lispenv->getVariableValue(expr->name);
 }
 vector<struct lispVar> lispInterpreter::VisitLiteralExpr(Literal* expr) 
 {
-    cout << "Entered VisitLiteralExpr: " << endl;
+    //cout << "Entered VisitLiteralExpr: " << endl;
     
     return expr->literalValue;
 }
 vector<struct lispVar> lispInterpreter::VisitYesOrNoExpr(YesOrNo* expr)
 {
-    cout << "Entered VisitYesOrNoExpr: " << endl;
+    //cout << "Entered VisitYesOrNoExpr: " << endl;
     vector<struct lispVar> a = eval(expr->value);
 
     struct lispVar lv;
     if(expr->name.getTokenType() == enum_str[ISNUMBER])
-        lv.value = isNumber(a.front().value, a.front().value) ? "true" : "false";
+        lv.value = isNumber(a) ? "true" : "";
     
     else if(expr->name.getTokenType() == enum_str[ISNIL])
-        lv.value = isNil(a.front().value) ? "true" : "false";
+        lv.value = isNil(a) ? "true" : "";
 
     else if(expr->name.getTokenType() == enum_str[ISSYMBOL])
-        lv.value = isNumber(a.front().value, a.front().value) ? "false" : "true";
+        lv.value = isSymbol(a) ? "true" : "";
 
     else if(expr->name.getTokenType() == enum_str[ISLIST])
-        lv.value = isList(a) ? "true" : "false";
+        lv.value = isList(a) ? "true" : "";
 
     vector<struct lispVar> returnbool;
     returnbool.push_back(lv);
@@ -400,7 +401,7 @@ vector<struct lispVar> lispInterpreter::VisitYesOrNoExpr(YesOrNo* expr)
 //lispStmt
 vector<struct lispVar> lispInterpreter::VisitPrintStmt(Print* stmt)
 {
-    cout << "   Enter VisitPrintStmt --" << endl;
+    //cout << "   Enter VisitPrintStmt --" << endl;
 
     vector<struct lispVar> value = eval(stmt->expression);
 
@@ -418,12 +419,12 @@ vector<struct lispVar> lispInterpreter::VisitPrintStmt(Print* stmt)
 }
 vector<struct lispVar> lispInterpreter::VisitVarStmt(Var* stmt)
 {
-    cout << "   Enter VisitVarStmt" << endl;
+    //cout << "   Enter VisitVarStmt" << endl;
 
     vector<struct lispVar> variableValue;
     if(stmt->init) variableValue = eval(stmt->init);
 
-    cout << "   completed eval in VisitVarStmt" << endl;
+    //cout << "   completed eval in VisitVarStmt" << endl;
 
     lispenv->define(stmt->name.getTokenLexeme(), variableValue);
     
@@ -433,7 +434,7 @@ vector<struct lispVar> lispInterpreter::VisitVarStmt(Var* stmt)
 }
 vector<struct lispVar> lispInterpreter::VisitFunctionStmt(Function* stmt)
 {
-    cout << "Enter VisitFunctionStmt" << endl;
+    //cout << "Enter VisitFunctionStmt" << endl;
 
     lispFunction* function = new lispFunction(stmt,lispenv);
     lispenv->defineLispFunction(stmt->name.getTokenLexeme(), function);
@@ -443,16 +444,16 @@ vector<struct lispVar> lispInterpreter::VisitFunctionStmt(Function* stmt)
 }
 vector<struct lispVar> lispInterpreter::VisitExpressionStmt(Expression* stmt)
 {
-    cout << "   Enter VisitExpressionStmt" << endl;
+    //cout << "   Enter VisitExpressionStmt" << endl;
     vector<struct lispVar> functionResult = eval(stmt->expression);
     return functionResult;
 }
 vector<struct lispVar> lispInterpreter::VisitReturnStmt(Return* stmt)
 {
-    cout << "   Enter VisitReturnStmt" << endl;
+    //cout << "   Enter VisitReturnStmt" << endl;
     if(stmt)
     {   
-        cout << "       in return" << endl;
+        //cout << "       in return" << endl;
         throw new lispFunctionReturn(eval(stmt->value));
     } 
 
@@ -461,7 +462,7 @@ vector<struct lispVar> lispInterpreter::VisitReturnStmt(Return* stmt)
 }
 vector<struct lispVar> lispInterpreter::VisitCondStmt(Cond* stmt)
 {
-    cout << "   Enter VisitCondStmt" << endl;
+    //cout << "   Enter VisitCondStmt" << endl;
     auto it_branch = stmt->conditionbranches.begin();
     for(auto it = stmt->conditions.begin(); it != stmt->conditions.end(); it++)
     {
@@ -694,6 +695,18 @@ string lispInterpreter::compareNumber(string a, string b, string binaryoperator)
     
     return "false";
 }
+bool lispInterpreter::isNumber(vector<struct lispVar> b)
+{
+    if(b.size() > 1) return false;
+    string a = b.front().value;
+    for (int x = 0; x < a.length(); x++)
+    {
+        if (isdigit(a[x])) continue;
+        else if(a[x] =='.' && isdigit(a[x+1])) continue;
+        else return false;
+    }
+    return true;
+}
 bool lispInterpreter::isNumber(string a, string b)
 {
     for (int x = 0; x < a.length(); x++)
@@ -702,25 +715,32 @@ bool lispInterpreter::isNumber(string a, string b)
         else if(a[x] =='.' && isdigit(a[x+1])) continue;
         else return false;
     }
-    for (int y = 0; y < b.length(); y++)
+    for (int x = 0; x < a.length(); x++)
     {
-        if (isdigit(b[y])) continue;
-        else if(b[y] =='.' && isdigit(b[y+1])) continue;
+        if (isdigit(a[x])) continue;
+        else if(a[x] =='.' && isdigit(a[x+1])) continue;
         else return false;
     }
-
+    return true;
+}
+bool lispInterpreter::isSymbol(vector<struct lispVar> b)
+{
+    if(b.size() > 1) return false;
+    if(isNumber(b)) return false;
     return true;
 }
 
-bool lispInterpreter::isNil(string a)
+bool lispInterpreter::isNil(vector<struct lispVar> b)
 {
+    if(b.size() > 1) return false;
+    
+    string a = b.front().value;
     if(a == "") return true;
-
     return false;
 }
-bool lispInterpreter::isList(vector<struct lispVar> a)
+bool lispInterpreter::isList(vector<struct lispVar> b)
 {
-    if(a.size() > 1) return true;
+    if(b.size() > 1) return true;
     return false;
 }
 void lispInterpreter::print(vector<struct lispVar> a)
