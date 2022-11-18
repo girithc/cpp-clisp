@@ -19,9 +19,11 @@ class lispEnvironment
         lispEnvironment(lispEnvironment* e);
         void define(string variable, vector<struct lispVar> variableValue);
         void defineLispFunction(string function, lispFunction* functionValue);
+        void print(); 
+        void resolve();
         vector<struct lispVar> getVariableValue(Token variable);
         lispFunction* getLispFunction(string functionName);
-        void print(); 
+        
         unordered_map <string,vector<struct lispVar>> lispMap;
         unordered_map <string, lispFunction*> lispFunctionMap;   
         
@@ -116,7 +118,9 @@ void lispEnvironment::define(string variable, vector<struct lispVar> variableVal
 {
     cout << "   Enter define:" << variable << " = " << variableValue.front().value << endl;
     print();
-    lispMap.insert({{variable, variableValue}});
+    if(lispMap.find(variable) != lispMap.end()) lispMap[variable] = variableValue;
+    
+    else lispMap.insert({{variable, variableValue}});
 
 
     //print();
@@ -133,6 +137,21 @@ void lispEnvironment::defineLispFunction(string function, lispFunction* function
 
     //define lispFunction
     lispFunctionMap.insert({{function, functionValue}});
+}
+void lispEnvironment::resolve()
+{
+    if(lispMap.size() == lispFunctionMap.size()) return;
+
+    for(auto it = lispFunctionMap.begin(); it != lispFunctionMap.end(); it++)
+    {
+        string a = it->first;
+        struct lispVar b;
+        b.value = "<lispFunction>";
+        vector<struct lispVar> lv_;
+        lv_.push_back(b);
+        lispMap.insert({{a,lv_}});
+    }
+
 }
 vector<struct lispVar> lispEnvironment::getVariableValue(Token variable)
 {
@@ -340,9 +359,11 @@ vector<struct lispVar> lispInterpreter::VisitCallExpr(Call* expr)
 
     cout << "   Completed VisitCallExpr function arguments" << endl;
     lispEnvironment* tempenv = new lispEnvironment();
-    tempenv->lispFunctionMap = lispenv->lispFunctionMap;
-    return function->lispFunctionCall(this,functionArguments);
+    
+    vector<struct lispVar> a = function->lispFunctionCall(this,functionArguments);
+
     //return {""};
+    return a;
 }
 vector<struct lispVar> lispInterpreter::VisitVariableExpr(Variable* expr) 
 {
