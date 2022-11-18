@@ -1,13 +1,33 @@
 (set a ())
-(set b 2)
-(set c "two")
-(set d (cons b c))
+
 (cond
-(nil? a)(print "a is nil"))
+(nil? a)(print "a is nil")
+(number? a)(print "a is a number")
+(symbol? a)(print "a is a symbol")
+(list? a)(print "a is a list"))
+
+(set a 2)
+
 (cond
-(number? b)(print "b is a number"))
+(nil? a)(print "a is nil")
+(number? a)(print "a is a number")
+(symbol? a)(print "a is a symbol")
+(list? a)(print "a is a list"))
+
+(set a "two")
+
 (cond
-(symbol? c)(print "c is a symbol"))
+(nil? a)(print "a is nil")
+(number? a)(print "a is a number")
+(symbol? a)(print "a is a symbol")
+(list? a)(print "a is a list"))
+
+
+(set a (cons () "two"))
+
 (cond
-(list? d)(print "d is a list"))
+(nil? a)(print "a is nil")
+(number? a)(print "a is a number")
+(symbol? a)(print "a is a symbol")
+(list? a)(print "a is a list"))
 

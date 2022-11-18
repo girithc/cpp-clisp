@@ -1,5 +1,3 @@
-replace string with struct lispVar (refer to lispSample/any.cpp)
-    - expr and stmt done
-    - lispParser done
-    - lispInterpreter to do
-complete cond command
+-fix isNumer isNil isString
+
+flaw - only check for 1st argument
