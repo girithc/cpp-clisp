@@ -22,11 +22,12 @@ class lispEnvironment
         vector<struct lispVar> getVariableValue(Token variable);
         lispFunction* getLispFunction(string functionName);
         void print(); 
+        unordered_map <string,vector<struct lispVar>> lispMap;
+        unordered_map <string, lispFunction*> lispFunctionMap;   
         
     private:
         lispEnvironment* enclosing;
-        unordered_map <string,vector<struct lispVar>> lispMap;
-        unordered_map <string, lispFunction*> lispFunctionMap;   
+        
             
 };
 class lispFunction
@@ -114,7 +115,9 @@ lispEnvironment::lispEnvironment(lispEnvironment* e)
 void lispEnvironment::define(string variable, vector<struct lispVar> variableValue)
 {
     cout << "   Enter define:" << variable << " = " << variableValue.front().value << endl;
+    print();
     lispMap.insert({{variable, variableValue}});
+
 
     //print();
 }
@@ -134,27 +137,42 @@ void lispEnvironment::defineLispFunction(string function, lispFunction* function
 vector<struct lispVar> lispEnvironment::getVariableValue(Token variable)
 {
     //print();
-    cout << "   Entered getVariableValue" << endl;
+    cout << "   Entered getVariableValue: " << variable.getTokenLexeme() << endl;
+    print();
     if(lispMap.find(variable.getTokenLexeme()) == lispMap.end())
     {
-        string message;
-        message.append("Variable \'");
-        message.append(variable.getTokenLexeme());
-        message.append("\' does not exist in the lisp environment.");
-        throw invalid_argument(message);
+        if(enclosing)
+        {
+            cout << "   entering enclosing" << endl;
+            return enclosing->getVariableValue(variable);
+        }
     }
     else
     {
         cout << "found value of variable" << endl;
+        return lispMap[variable.getTokenLexeme()];
         //exit(1);
     }
-    return lispMap[variable.getTokenLexeme()];
+    
+    string message;
+    message.append("Variable \'");
+    message.append(variable.getTokenLexeme());
+    message.append("\' does not exist in the lisp environment.");
+    throw invalid_argument(message);
         
 }
 lispFunction* lispEnvironment::getLispFunction(string functionName)
 {
-    if(lispFunctionMap.find(functionName) != lispFunctionMap.end())
+    cout << "   Entered getLispFunction" << endl;
+    print();
+    if(lispFunctionMap.find(functionName) == lispFunctionMap.end())
     {
+        cout << "   entering enclosing" << endl;
+        return enclosing->getLispFunction(functionName);
+    }
+    else
+    {
+        cout << "found value of Function" << endl;
         return lispFunctionMap[functionName];
     }
 
@@ -175,6 +193,7 @@ void lispEnvironment::print()
 //lispFunction
 lispFunction::lispFunction(Function* init, lispEnvironment* lispFunctionEnvironment)
 {
+    cout << "   Declare lispFunction()" << endl;
     this->init = init;
     this->lispFunctionEnvironment = lispFunctionEnvironment;
     //this->lispFunctionEnvironment->print();
@@ -320,6 +339,8 @@ vector<struct lispVar> lispInterpreter::VisitCallExpr(Call* expr)
         
 
     cout << "   Completed VisitCallExpr function arguments" << endl;
+    lispEnvironment* tempenv = new lispEnvironment();
+    tempenv->lispFunctionMap = lispenv->lispFunctionMap;
     return function->lispFunctionCall(this,functionArguments);
     //return {""};
 }
@@ -474,6 +495,10 @@ vector<struct lispVar> lispInterpreter::cons(vector<struct lispVar> a, vector<st
 vector<struct lispVar> lispInterpreter::cdr(vector<struct lispVar> a)
 {
     a.erase(a.begin());
+    if(a.front().value.empty())
+    {
+        return a.front().next;            
+    }
     return a;
 }
 vector<struct lispVar> lispInterpreter::car(vector<struct lispVar> a)
@@ -481,6 +506,7 @@ vector<struct lispVar> lispInterpreter::car(vector<struct lispVar> a)
     vector<struct lispVar> aprime; 
     
     if(a.front().value.empty()) return a.front().next;
+    
     else aprime.push_back(a.front());
 
     return aprime;

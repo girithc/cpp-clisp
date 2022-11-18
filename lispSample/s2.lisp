@@ -1,35 +1,11 @@
-(define fun (a b)
-    //(print  (cdr (cons (cons a b) (cons b a)) ))
-    //(number? a)
-    //(print "World")
-    //(cons a b)
-    //(car b)
-    //(car a)
+(define fun(a b)
+    (print b)
     (cond
-    (> a b)(print "a is greater than b")
-    (< a b)(print "a is less than b"))
-    (print a)
+    (> a b)(print (cons (fun (+ 1 a) (* 3 b)) b))
+    (<= a b)(cons a b))
 )
 
-//(print (fun "yes" "no"))
-(set a "A")
-(print (list? a))
-(cond
-(< 1 1)(print 1)
-(= 2 2)(set b (cons a a))
-)
-(print b)
-(fun 1 2)
-
-
-
-
-//(print "hello")
-//(print (- 4 5))
-//(set a "2")
-//(print a)
-//(set b (cons a a))
-//(print b)
-//(set c (cons a b))
-//(print c)
-//(print (cons c a))
+(fun 2 1)
+(print a)
+(set a 42)
+(print a)
