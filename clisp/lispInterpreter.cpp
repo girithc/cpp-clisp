@@ -16,7 +16,7 @@ class lispEnvironment
 {
     public:
         lispEnvironment();
-        lispEnvironment(lispEnvironment* e);
+        lispEnvironment(lispEnvironment *e);
         void define(string variable, vector<struct lispVar> variableValue);
         void defineLispFunction(string function, lispFunction* functionValue);
         void print(); 
@@ -51,9 +51,10 @@ class lispInterpreter: public Visitor, VisitorStmt
         void interpret();
         void interpretLispStmt(Stmt* lispStmt);
         vector<struct lispVar> executeFunctionBlock(list<Stmt*> lispFunctionStmts, lispEnvironment* lispenv);
+        lispEnvironment* globals = new lispEnvironment();
 
     private:
-        lispEnvironment* lispenv;
+        lispEnvironment* lispenv = globals;
         list<Stmt*> lispStmts;
 
         vector<struct lispVar> VisitBinaryExpr(Binary* expr) override;
@@ -92,7 +93,6 @@ class lispInterpreter: public Visitor, VisitorStmt
         string compareNumber(string a, string b, string binaryoperator);
         bool isNumber(string a, string b);
         bool isNumber(string a);
-        bool isString(string a);
         bool isNil(string a);
         bool isList(vector<struct lispVar> a);
         void print(vector<struct lispVar> a);
@@ -108,9 +108,8 @@ class lispFunctionReturn
 //lispEnvironment
 lispEnvironment::lispEnvironment()
 {
-    enclosing = NULL;
 }
-lispEnvironment::lispEnvironment(lispEnvironment* e)
+lispEnvironment::lispEnvironment(lispEnvironment *e)
 {
     enclosing = e;
 }
@@ -221,7 +220,7 @@ vector<struct lispVar> lispFunction::lispFunctionCall(lispInterpreter* lispFunct
 {
     //new lispFunction environment
     cout << "   Enter lispFunctionCall" << endl;
-    lispEnvironment* lispenv = new lispEnvironment(lispFunctionEnvironment);
+    lispEnvironment* lispenv = new lispEnvironment(lispFunctionInterpreter->globals);
     list<Token>::iterator parametersIterator = init->params.begin();
     list<vector<struct lispVar>>::iterator parametersValueIterator = lispFunctionArguments.begin();
 
@@ -253,7 +252,6 @@ vector<struct lispVar> lispFunction::lispFunctionCall(lispInterpreter* lispFunct
 lispInterpreter::lispInterpreter(list<Stmt*> lispStmts)
 {
     this->lispStmts = lispStmts;
-    lispenv = new lispEnvironment();
 }
 void lispInterpreter::interpret()
 {
@@ -358,7 +356,6 @@ vector<struct lispVar> lispInterpreter::VisitCallExpr(Call* expr)
         
 
     cout << "   Completed VisitCallExpr function arguments" << endl;
-    lispEnvironment* tempenv = new lispEnvironment();
     
     vector<struct lispVar> a = function->lispFunctionCall(this,functionArguments);
 
@@ -714,6 +711,7 @@ bool lispInterpreter::isNumber(string a, string b)
 
     return true;
 }
+
 bool lispInterpreter::isNil(string a)
 {
     if(a == "") return true;
