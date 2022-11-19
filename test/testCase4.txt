@@ -1,0 +1,17 @@
+(define binTree(tree x)
+(cond 
+(nil? tree)(cons x (cons ()()) )
+(> x (car tree)) (cons (car tree) (cons  (car (cdr tree)) (binTree (cdr (cdr tree)) x) ) ) 
+(<= x (car tree)) (cons  (binTree  (car (cdr tree))  x) tree)    
+))
+(set a ())
+(set b (binTree a 2))
+(print b)
+(print (binTree b 4))
+
+
+testCase4()
+Test passed: ([ (2) ((())(()))]) = [ (2) ((())(()))]
+Test passed: ([ (2) ((())( (4) ((())(()))))]) = [ (2) ((())( (4) ((())(()))))]
+
+

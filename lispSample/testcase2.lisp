@@ -1,8 +1,0 @@
-(set a 2)
-(set b 4)
-(set c (cons a b))
-(set d (cons c 6))
-(print d)
-(print (car d))
-(print (cdr d))
-(print (cdr (cdr d)))

@@ -1,33 +1,33 @@
 (set a ())
-
 (cond
 (nil? a)(print "a is nil")
 (number? a)(print "a is a number")
 (symbol? a)(print "a is a symbol")
 (list? a)(print "a is a list"))
-
 (set a 2)
-
 (cond
 (nil? a)(print "a is nil")
 (number? a)(print "a is a number")
 (symbol? a)(print "a is a symbol")
 (list? a)(print "a is a list"))
-
 (set a "two")
-
 (cond
 (nil? a)(print "a is nil")
 (number? a)(print "a is a number")
 (symbol? a)(print "a is a symbol")
 (list? a)(print "a is a list"))
-
-
 (set a (cons () "two"))
-
 (cond
 (nil? a)(print "a is nil")
 (number? a)(print "a is a number")
 (symbol? a)(print "a is a symbol")
 (list? a)(print "a is a list"))
+
+
+testCase1()
+Test passed: ([ (a is nil) ]) = [ (a is nil) ]
+Test passed: ([ (a is a number) ]) = [ (a is a number) ]
+Test passed: ([ (a is a symbol) ]) = [ (a is a symbol) ]
+Test passed: ([ (a is a list) ]) = [ (a is a list) ]
+
 

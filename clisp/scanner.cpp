@@ -99,10 +99,6 @@ LispScanner::scanToken()
              break;
         case ')': 
             addToken(RIGHT_PAREN); break;
-        case '{': 
-            addToken(LEFT_BRACE); break;
-        case '}': 
-            addToken(RIGHT_BRACE); break;
         case ',': 
             addToken(COMMA); break;
         case '.': 
@@ -147,18 +143,6 @@ LispScanner::scanToken()
                 addToken(SLASH);
             }
             break;
-        case '/':
-            if (match('/')) {
-                // a line of comment
-                while(isNotEnd() && lookAhead() != '\n')
-                    advance();
-            } 
-            else {
-                addToken(SLASH);
-            }
-            break;
-
-
         case ' ':
         case '\r':
         case '\t':
@@ -251,7 +235,7 @@ LispScanner::addTokenSymbol()
 {
     while(isNotEnd() && lookAhead()!='"')
     {
-        //cout << "   consuming string" << endl;
+
         if(lookAhead()!='\n') advance();
         line ++;
     }

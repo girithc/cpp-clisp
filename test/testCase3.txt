@@ -1,0 +1,14 @@
+(define factorial(a)
+(cond
+(= a 0)(+ 1 0))
+(* a (factorial (- a 1)))
+)
+(print (factorial 4))
+(print (factorial 14))
+
+
+testCase3()
+Test passed: ([ (24.000000) ]) = [ (24.000000) ]
+Test passed: ([ (87178291200.000000) ]) = [ (87178291200.000000) ]
+
+

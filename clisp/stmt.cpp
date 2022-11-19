@@ -24,7 +24,6 @@ class Cond;
 class Print;
 class Return;
 class Var;
-class While;
 
 class VisitorStmt : public Stmt 
 {
@@ -38,7 +37,7 @@ class VisitorStmt : public Stmt
         virtual vector<struct lispVar> VisitPrintStmt(Print* stmt){vector<struct lispVar> lv; return lv;};
         virtual vector<struct lispVar> VisitReturnStmt(Return* stmt){vector<struct lispVar> lv; return lv;};
         virtual vector<struct lispVar> VisitVarStmt(Var* stmt){vector<struct lispVar> lv; return lv;};
-        virtual vector<struct lispVar> VisitWhileStmt(While* stmt){vector<struct lispVar> lv; return lv;};
+        
 };
 
 class Block : public Stmt
@@ -182,21 +181,3 @@ class Var : public Stmt
         }
 };
 
-
-class While : public Stmt
-{
-    public:
-        Expr* condition;
-        Stmt* body;
-
-        While(Expr* c, Stmt* b)
-        {
-            condition = c;
-            body = b;
-        }
-
-        vector<struct lispVar> Accept(VisitorStmt* visitor)
-        {
-            return visitor->VisitWhileStmt(this);
-        }
-};

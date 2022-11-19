@@ -2,7 +2,7 @@
 #include <string>
 #include <fstream>
 #include <iterator>
-#include "scanner.cpp"
+#include "testLispInterpreter.cpp"
 
 class Lisp
 {
@@ -61,7 +61,13 @@ int main(int argc, char** argv)
     {
         std::cout << "User input is missing the file name" << std::endl;
     }
-    else if(argc == 2)
+    else if(argc == 2 && (strcmp(argv[1],"test") == 0))
+    {
+        cout << "Start testing lisp Interpreter..." << endl;
+        testLispInterpreter();
+        cout << "Finished testing lisp Interpreter." << endl;
+    }
+    else
     {
         Lisp lsp;
         lsp.runFile(argv[1]);
