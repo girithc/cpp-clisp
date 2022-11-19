@@ -1,3 +1,0 @@
--fix isNumer isNil isString
-
-flaw - only check for 1st argument
